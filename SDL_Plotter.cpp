@@ -104,6 +104,13 @@ bool SDL_Plotter::kbhit(){
     return flag;
 }
 
+void SDL_Plotter::pollForEvents() {
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT)
+            quit = true;
+    }
+}
+
 char SDL_Plotter::getKey(){
 
     char key = '\0';

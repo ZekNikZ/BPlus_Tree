@@ -90,6 +90,8 @@ public:
 
     bool kbhit();
 
+    void pollForEvents();
+
     char getKey();
 
     void plotPixel(int x, int y, int r, int g, int b);
