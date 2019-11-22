@@ -1,8 +1,14 @@
 #include <iostream>
+#include "SDL_Plotter.h"
 
 using namespace std;
 
 int main() {
-    cout << "Hello, World!" << endl;
+    SDL_Plotter plotter;
+
+    while (!plotter.getQuit()) {
+        plotter.kbhit();
+    }
+
     return 0;
 }

@@ -7,6 +7,8 @@ using namespace std;
 
 template<typename T>
 class BPlusTree {
+    friend class BPlusTreeRenderer;
+
 private:
     class Node {
     private:
