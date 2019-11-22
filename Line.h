@@ -5,10 +5,13 @@
 
 class Line {
 private:
-    int fromX, int fromY, int toX, int toY;
+    int fromX;
+    int fromY;
+    int toX;
+    int toY;
 
 public:
-    Line(int fromX =  0, int fromY = 0, int toX = 0, int toY = 0);
+    explicit Line(int fromX =  0, int fromY = 0, int toX = 0, int toY = 0);
     void draw(SDL_Plotter& g);
 };
 

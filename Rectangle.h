@@ -9,7 +9,7 @@ private:
     int width, height;
 
 public:
-    Rectangle(int x = 0, int y = 0, int width = 0, int height = 0);
+    explicit Rectangle(int x = 0, int y = 0, int width = 0, int height = 0);
     void draw(SDL_Plotter& g);
 };
 
