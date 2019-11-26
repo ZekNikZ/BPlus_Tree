@@ -5,16 +5,19 @@
 #include "BPlusTree.h"
 #include "BPlusTreeRenderer.h"
 #include "Rectangle.h"
+#include "Arrow.h"
 #include <chrono>
 
 using namespace std;
 
 int main() {
+    const int TARGET_FPS = 30;
+    const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
+
     SDL_Plotter plotter;
     BPlusTreeRenderer renderer;
     Rectangle rect{10,10,100,50, Color::BLACK(), 5, true, Color::RED()};
-    const int TARGET_FPS = 30;
-    const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
+    Arrow arr{10, 10, rect.getX(), rect.getY(), 4, Color::BLUE()};
 
     BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
 
@@ -35,8 +38,12 @@ int main() {
         if (plotter.isKeyDown('W'))
             rect.setWidth(rect.getWidth() - 5);
 
+        arr.setToX(rect.getX());
+        arr.setToY(rect.getY());
+
         plotter.clear();
         rect.draw(plotter);
+        arr.draw(plotter);
         renderer.draw(plotter, tree, 20, 20);
         plotter.update();
 
