@@ -18,38 +18,33 @@ void Rectangle::draw(SDL_Plotter &g) {
     }
 
     // top outline
-    for (int row = coords.y;
-         row < coords.y + outlineThickness - coords.topCutOff; ++row) {
-        for (int col = coords.x; col < coords.x + coords.width; ++col) {
+    ScreenAdjustedCoords coords2(g, x, y, width, outlineThickness);
+    for (int row = coords2.y; row < coords2.y + coords2.height; ++row) {
+        for (int col = coords2.x; col < coords2.x + coords2.width; ++col) {
             g.plotPixel(col, row, outlineColor);
         }
     }
     // bottom outline
-    for (int row =
-            coords.y + coords.height - outlineThickness + coords.bottomCutOff;
-         row < coords.y + coords.height;
-         ++row) {
-        for (int col = coords.x; col < coords.x + coords.width; ++col) {
+    ScreenAdjustedCoords coords3(g, x, y + height - outlineThickness, width, outlineThickness);
+    for (int row = coords3.y; row < coords3.y + coords3.height; ++row) {
+        for (int col = coords3.x; col < coords3.x + coords3.width; ++col) {
             g.plotPixel(col, row, outlineColor);
         }
     }
 
     // left outline
-    for (int col = coords.x;
-         col < coords.x + outlineThickness - coords.leftCutOff; ++col) {
-        for (int row = coords.y; row < coords.y + coords.height; ++row) {
+    ScreenAdjustedCoords coords4(g, x, y, outlineThickness, height);
+    for (int row = coords4.y; row < coords4.y + coords4.height; ++row) {
+        for (int col = coords4.x; col < coords4.x + coords4.width; ++col) {
             g.plotPixel(col, row, outlineColor);
         }
     }
+
     // right outline
-    for (int col = coords.x + coords.width - outlineThickness + coords.rightCutOff;
-         col < coords.x + coords.width;
-         ++col)
-    {
-        for (int row = coords.y; row < coords.y + coords.height; ++row) {
+    ScreenAdjustedCoords coords5(g, x + width - outlineThickness, y, outlineThickness, height);
+    for (int row = coords5.y; row < coords5.y + coords5.height; ++row) {
+        for (int col = coords5.x; col < coords5.x + coords5.width; ++col) {
             g.plotPixel(col, row, outlineColor);
         }
     }
-
-
 }
