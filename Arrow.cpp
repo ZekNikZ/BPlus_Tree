@@ -18,7 +18,7 @@ void Arrow::draw(SDL_Plotter &g) {
         && (int)curY + thickness < g.getRow();
     for (int i = 0; i < numSamples && inBounds; ++i) {
         // TODO: Optimize this if needed
-        Rectangle rect{(int)curX, (int)curY, thickness, thickness, Color::BLACK(), 0, true, color};
+        Rectangle rect{(int)curX, (int)curY, thickness, thickness, 0, Color::BLACK(), true, color};
         rect.draw(g);
         curX += dX;
         curY += dY;

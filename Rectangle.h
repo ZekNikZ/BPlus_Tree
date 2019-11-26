@@ -15,7 +15,7 @@ private:
 
 public:
     explicit Rectangle(int x = 0, int y = 0, int width = 0, int height = 0,
-            Color outlineColor = Color::BLACK(), int outlineThickness = 1, bool fill = false,
+            int outlineThickness = 1, Color outlineColor = Color::BLACK(), bool fill = false,
             Color fillColor = Color::BLACK())
      : x{x}, y{y}, width{width}, height{height}, outlineColor{outlineColor},
      hasFill{fill}, fillColor{fillColor}, outlineThickness{outlineThickness}

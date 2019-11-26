@@ -16,7 +16,7 @@ int main() {
 
     SDL_Plotter plotter;
     BPlusTreeRenderer renderer;
-    Rectangle rect{10,10,100,50, Color::BLACK(), 5, true, Color::RED()};
+    Rectangle rect{10,10,100,50, 5, Color::BLACK(), true, Color::RED()};
     Arrow arr{10, 10, rect.getX(), rect.getY(), 4, Color::BLUE()};
 
     BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
