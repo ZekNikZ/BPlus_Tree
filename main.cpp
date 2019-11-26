@@ -4,6 +4,7 @@
 #include "BitmapImage.h"
 #include "BPlusTree.h"
 #include "BPlusTreeRenderer.h"
+#include "Rectangle.h"
 #include <chrono>
 
 using namespace std;
@@ -11,7 +12,7 @@ using namespace std;
 int main() {
     SDL_Plotter plotter;
     BPlusTreeRenderer renderer;
-    BitmapImage testImg("images/coolImage.bmp");
+    Rectangle rect{10,10,100,50, Color::BLACK(), 5, true, Color::RED()};
     const int TARGET_FPS = 30;
     const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
 
@@ -21,8 +22,21 @@ int main() {
         auto startTime = chrono::system_clock::now();
         plotter.pollForEvents();
 
+        if (plotter.isKeyDown(UP_ARROW))
+            rect.setY(rect.getY() - 4);
+        if (plotter.isKeyDown(DOWN_ARROW))
+            rect.setY(rect.getY() + 4);
+        if (plotter.isKeyDown(LEFT_ARROW))
+            rect.setX(rect.getX() - 4);
+        if (plotter.isKeyDown(RIGHT_ARROW))
+            rect.setX(rect.getX() + 4);
+        if (plotter.isKeyDown('Q'))
+            rect.setWidth(rect.getWidth() + 5);
+        if (plotter.isKeyDown('W'))
+            rect.setWidth(rect.getWidth() - 5);
+
         plotter.clear();
-        testImg.draw(plotter, 10, 10);
+        rect.draw(plotter);
         renderer.draw(plotter, tree, 20, 20);
         plotter.update();
 
