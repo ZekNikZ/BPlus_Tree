@@ -14,6 +14,7 @@ class BPlusTree {
 
 private:
     class Node {
+        friend class BPlusTreeRenderer;
         friend BPlusTree BPlusTree::makeTestTree();
 
     public:

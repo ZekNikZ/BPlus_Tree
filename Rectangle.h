@@ -36,6 +36,11 @@ public:
 
     int getHeight() const { return this->height; }
     void setHeight(int height) { this->height = height; }
+    
+    void shiftX(int dx) {x += dx;}
+    void shiftY(int dy) {y += dy;}
+    void stretchX(int dx) {width += dx;}
+    void stretchY(int dy) {height += dy;}
 };
 
 #endif // RECTANGLE_H

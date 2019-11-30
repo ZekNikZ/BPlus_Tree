@@ -52,6 +52,8 @@ int main() {
         if (ms < TARGET_FRAME_MILLISECONDS) {
             plotter.Sleep(TARGET_FRAME_MILLISECONDS - ms);
         }
+        
+        renderer.draw(plotter, tree, plotter.getCol() / 2, plotter.getRow() / 2);
     }
 
     return 0;
