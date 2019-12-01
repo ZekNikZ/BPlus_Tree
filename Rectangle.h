@@ -41,6 +41,12 @@ public:
     void shiftY(int dy) {y += dy;}
     void stretchX(int dx) {width += dx;}
     void stretchY(int dy) {height += dy;}
+
+    void setFill(bool fill) {hasFill = fill;}
+    void setFill(Color color, bool fill=true) {fillColor = color; hasFill = fill;}
+
+    void setOutline(int thickness) {outlineThickness = thickness; }
+    void setOutline(Color color, int thickness) {outlineColor = color; outlineThickness = thickness; }
 };
 
 #endif // RECTANGLE_H

@@ -6,6 +6,7 @@
 #include "BPlusTreeRenderer.h"
 #include "Rectangle.h"
 #include "Arrow.h"
+#include "CharacterGraphics.h"
 #include <chrono>
 
 using namespace std;
@@ -44,7 +45,7 @@ int main() {
         plotter.clear();
         rect.draw(plotter);
         arr.draw(plotter);
-        renderer.draw(plotter, tree, 20, 20);
+        renderer.draw(plotter, tree, plotter.getCol() / 2, plotter.getRow() / 2);
         plotter.update();
 
         auto timeDiff = chrono::system_clock::now() - startTime;
@@ -52,8 +53,6 @@ int main() {
         if (ms < TARGET_FRAME_MILLISECONDS) {
             plotter.Sleep(TARGET_FRAME_MILLISECONDS - ms);
         }
-        
-        renderer.draw(plotter, tree, plotter.getCol() / 2, plotter.getRow() / 2);
     }
 
     return 0;

@@ -17,6 +17,7 @@ struct Color {
     static Color RED() { return Color{255,0,0}; }
     static Color GREEN() { return Color{0,255,0}; }
     static Color BLUE() { return Color{0,0,255}; }
+    static Color YELLOW() { return Color{255,255,0}; }
 };
 
 #endif //BPLUS_TREE_COLOR_H
