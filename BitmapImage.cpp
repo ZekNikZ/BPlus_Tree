@@ -9,13 +9,29 @@ BitmapImage::BitmapImage(const string &filepath) {
         cerr << "File not found: " << filepath << '\n';
         return;
     }
-    load(file);
+    load(file, false);
+    file.close();
+}
+
+BitmapImage::BitmapImage(const string &filepath, Color transparentColor) {
+    width = height = 0;
+    ifstream file(filepath, ios::in | ios::binary);
+    if (!file) {
+        cerr << "File not found: " << filepath << '\n';
+        return;
+    }
+    load(file, true, transparentColor);
     file.close();
 }
 
 BitmapImage::BitmapImage(istream &in) {
     width = height = 0;
-    load(in);
+    load(in, false);
+}
+
+BitmapImage::BitmapImage(istream &in, Color transparentColor) {
+    width = height = 0;
+    load(in, true, transparentColor);
 }
 
 template <typename T>
@@ -25,7 +41,7 @@ T read(istream& in) {
     return result;
 }
 
-bool BitmapImage::load(istream &in) {
+bool BitmapImage::load(istream &in, bool useTransparent, Color transparentColor) {
     // see https://en.wikipedia.org/wiki/BMP_file_format#File_structure
 
     // Bitmap file header
@@ -40,11 +56,11 @@ bool BitmapImage::load(istream &in) {
         return false;
     }
     // explicitly use uint32_t since the file format says it's a 4 byte filesize
-    uint32_t fileSize = read<uint32_t>(in);
+    auto fileSize = read<uint32_t>(in);
 
     in.ignore(4); // skip reserved space
 
-    uint32_t pixelDataOffset = read<uint32_t>(in);
+    auto pixelDataOffset = read<uint32_t>(in);
 
     // DIB header
     // This only supports the BITMAPINFOHEADER header, with this format:
@@ -57,7 +73,7 @@ bool BitmapImage::load(istream &in) {
     // 4 bytes: image size
     // everything else is ignored in this implementation
 
-    uint32_t sizeOfDibHeader = read<uint32_t>(in);
+    auto sizeOfDibHeader = read<uint32_t>(in);
     if (sizeOfDibHeader != 40) {
         cerr << "Couldn't read image file, DIB header not supported\n";
         return false;
@@ -67,25 +83,25 @@ bool BitmapImage::load(istream &in) {
     int width = read<int32_t>(in);
     int height = read<int32_t>(in);
 
-    uint16_t numColorPlanes = read<uint16_t>(in);
+    auto numColorPlanes = read<uint16_t>(in);
     if (numColorPlanes != 1) {
         cerr << "Couldn't read image file, invalid number of color planes\n";
         return false;
     }
 
-    uint16_t bitsPerPixel = read<uint16_t>(in);
+    auto bitsPerPixel = read<uint16_t>(in);
     if (bitsPerPixel != 24) {
         cerr << "Couldn't read image file, only 24bpp is supported\n";
         return false;
     }
 
-    uint32_t compressionMethod = read<uint32_t>(in);
+    auto compressionMethod = read<uint32_t>(in);
     if (compressionMethod != 0) {
         cerr << "Couldn't read image file, compression not supported\n";
         return false;
     }
 
-    uint32_t imageSize = read<uint32_t>(in);
+    auto imageSize = read<uint32_t>(in);
     // doesn't necessarily equal 3*width*height because of padding
     //if (3 * width * height != imageSize) {
     //    cerr << "Warning: imageSize = " << imageSize << ", 3*width*height = " << 3*width*height << "\n";
@@ -102,6 +118,12 @@ bool BitmapImage::load(istream &in) {
             color.blue = read<unsigned char>(in);
             color.green = read<unsigned char>(in);
             color.red = read<unsigned char>(in);
+            if (useTransparent && color.red == transparentColor.red
+                && color.green == transparentColor.green
+                && color.blue == transparentColor.blue)
+            {
+                color.transparent = true;
+            }
         }
         // rows are padded to align every 4 bytes
         auto pos = in.tellg() - (streampos)pixelDataOffset;
@@ -124,7 +146,8 @@ void BitmapImage::draw(SDL_Plotter &p, int x, int y) {
     for (int yPos = coords.y, imgRow = coords.topCutOff; yPos < coords.y + coords.height; ++yPos, ++imgRow) {
         for (int xPos = coords.x, imgCol = coords.leftCutOff; xPos < coords.x + coords.width; ++xPos, ++imgCol) {
             Color& c = data[imgRow*width + imgCol];
-            p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
+            if (!c.transparent)
+                p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
         }
     }
 }

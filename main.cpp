@@ -21,7 +21,7 @@ int main() {
 
     int x = 10;
     int y = 10;
-    BitmapImage testImg("images/coolImage.bmp");
+    BitmapImage testImg("images/coolImage.bmp", Color{239, 228, 176});
 
     while (!plotter.getQuit()) {
         auto startTime = chrono::system_clock::now();

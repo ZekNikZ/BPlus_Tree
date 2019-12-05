@@ -7,6 +7,13 @@ struct Color {
     uint8_t red;
     uint8_t green;
     uint8_t blue;
+    bool transparent;
+
+    explicit Color(uint8_t red = 0, uint8_t green = 0, uint8_t blue = 0, bool transparent = false)
+     : red{red}, green{green}, blue{blue}, transparent{transparent}
+    {
+
+    }
 
     static Color BLACK() { return Color{0,0,0}; }
     static Color WHITE() { return Color{255,255,255}; }
