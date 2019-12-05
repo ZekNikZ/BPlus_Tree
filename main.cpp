@@ -17,10 +17,11 @@ int main() {
 
     SDL_Plotter plotter;
     BPlusTreeRenderer renderer;
-    Rectangle rect{10,10,100,50, 5, Color::BLACK(), true, Color::RED()};
-    Arrow arr{10, 10, rect.getX(), rect.getY(), 4, Color::BLUE()};
-
     BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
+
+    int x = 10;
+    int y = 10;
+    BitmapImage testImg("images/coolImage.bmp");
 
     while (!plotter.getQuit()) {
         auto startTime = chrono::system_clock::now();
@@ -31,25 +32,18 @@ int main() {
         // Handle input
         switch (plotter.getKey()) {
             case UP_ARROW:
-                rect.setY(rect.getY() - 4); break;
+                y -= 4; break;
             case DOWN_ARROW:
-                rect.setY(rect.getY() + 4); break;
+                y += 4; break;
             case LEFT_ARROW:
-                rect.setX(rect.getX() - 4); break;
+                x -= 4; break;
             case RIGHT_ARROW:
-                rect.setX(rect.getX() + 4); break;
-            case 'Q':
-                rect.setWidth(rect.getWidth() + 5); break;
-            case 'W':
-                rect.setWidth(rect.getWidth() - 5); break;
+                x += 4; break;
         }
 
-        arr.setToX(rect.getX());
-        arr.setToY(rect.getY());
 
         plotter.clear();
-        rect.draw(plotter);
-        arr.draw(plotter);
+        testImg.draw(plotter, x, y);
         renderer.draw(plotter, tree, plotter.getCol() / 2, plotter.getRow() / 2);
         plotter.update();
 

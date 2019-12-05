@@ -1,5 +1,6 @@
 #include <fstream>
 #include "BitmapImage.h"
+#include "ScreenAdjustedCoords.h"
 
 BitmapImage::BitmapImage(const string &filepath) {
     width = height = 0;
@@ -118,12 +119,12 @@ bool BitmapImage::load(istream &in) {
 }
 
 void BitmapImage::draw(SDL_Plotter &p, int x, int y) {
-    // TODO: Fix if part of it gets cut off at edge
-    for (int row = 0; row < height; ++row) {
-        for (int col = 0; col < width; ++col) {
-            Color& c = data[row * width + col];
-            p.plotPixel(x + col, y + row, c.red, c.green, c.blue);
+    ScreenAdjustedCoords coords{p, x, y, width, height};
+    // e.g: if 2 pixels got cut off at the top of the screen, start at row 2
+    for (int yPos = coords.y, imgRow = coords.topCutOff; yPos < coords.y + coords.height; ++yPos, ++imgRow) {
+        for (int xPos = coords.x, imgCol = coords.leftCutOff; xPos < coords.x + coords.width; ++xPos, ++imgCol) {
+            Color& c = data[imgRow*width + imgCol];
+            p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
         }
     }
-
 }
