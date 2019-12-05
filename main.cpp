@@ -24,20 +24,25 @@ int main() {
 
     while (!plotter.getQuit()) {
         auto startTime = chrono::system_clock::now();
-        plotter.pollForEvents();
+        // Poll for events
+        while (plotter.kbhit()) {
 
-        if (plotter.isKeyDown(UP_ARROW))
-            rect.setY(rect.getY() - 4);
-        if (plotter.isKeyDown(DOWN_ARROW))
-            rect.setY(rect.getY() + 4);
-        if (plotter.isKeyDown(LEFT_ARROW))
-            rect.setX(rect.getX() - 4);
-        if (plotter.isKeyDown(RIGHT_ARROW))
-            rect.setX(rect.getX() + 4);
-        if (plotter.isKeyDown('Q'))
-            rect.setWidth(rect.getWidth() + 5);
-        if (plotter.isKeyDown('W'))
-            rect.setWidth(rect.getWidth() - 5);
+        }
+        // Handle input
+        switch (plotter.getKey()) {
+            case UP_ARROW:
+                rect.setY(rect.getY() - 4); break;
+            case DOWN_ARROW:
+                rect.setY(rect.getY() + 4); break;
+            case LEFT_ARROW:
+                rect.setX(rect.getX() - 4); break;
+            case RIGHT_ARROW:
+                rect.setX(rect.getX() + 4); break;
+            case 'Q':
+                rect.setWidth(rect.getWidth() + 5); break;
+            case 'W':
+                rect.setWidth(rect.getWidth() - 5); break;
+        }
 
         arr.setToX(rect.getX());
         arr.setToY(rect.getY());

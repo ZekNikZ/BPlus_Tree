@@ -22,8 +22,6 @@
 #include <string>
 #include <string.h>
 #include <map>
-#include "Color.h"
-
 using namespace std;
 
 const char UP_ARROW    = 1;
@@ -92,13 +90,9 @@ public:
 
     bool kbhit();
 
-    void pollForEvents();
-
     char getKey();
-    bool isKeyDown(char key);
 
     void plotPixel(int x, int y, int r, int g, int b);
-    void plotPixel(int x, int y, const Color& color);
 
     void clear();
 

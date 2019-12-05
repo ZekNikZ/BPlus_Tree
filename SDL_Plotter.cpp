@@ -104,17 +104,10 @@ bool SDL_Plotter::kbhit(){
     return flag;
 }
 
-void SDL_Plotter::pollForEvents() {
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT)
-            quit = true;
-    }
-    currentKeyStates = SDL_GetKeyboardState(nullptr);
-}
-
 char SDL_Plotter::getKey(){
 
     char key = '\0';
+
 
     currentKeyStates = SDL_GetKeyboardState( NULL );
     if(currentKeyStates[SDL_SCANCODE_A]) key = 'A';
@@ -164,60 +157,8 @@ char SDL_Plotter::getKey(){
     return key;
 }
 
-bool SDL_Plotter::isKeyDown(char key) {
-    switch (key) {
-        case 'A': return currentKeyStates[SDL_SCANCODE_A];
-        case 'B': return currentKeyStates[SDL_SCANCODE_B];
-        case 'C': return currentKeyStates[SDL_SCANCODE_C];
-        case 'D': return currentKeyStates[SDL_SCANCODE_D];
-        case 'E': return currentKeyStates[SDL_SCANCODE_E];
-        case 'F': return currentKeyStates[SDL_SCANCODE_F];
-        case 'G': return currentKeyStates[SDL_SCANCODE_G];
-        case 'H': return currentKeyStates[SDL_SCANCODE_H];
-        case 'I': return currentKeyStates[SDL_SCANCODE_I];
-        case 'J': return currentKeyStates[SDL_SCANCODE_J];
-        case 'K': return currentKeyStates[SDL_SCANCODE_K];
-        case 'L': return currentKeyStates[SDL_SCANCODE_L];
-        case 'M': return currentKeyStates[SDL_SCANCODE_M];
-        case 'N': return currentKeyStates[SDL_SCANCODE_N];
-        case 'O': return currentKeyStates[SDL_SCANCODE_O];
-        case 'P': return currentKeyStates[SDL_SCANCODE_P];
-        case 'Q': return currentKeyStates[SDL_SCANCODE_Q];
-        case 'R': return currentKeyStates[SDL_SCANCODE_R];
-        case 'S': return currentKeyStates[SDL_SCANCODE_S];
-        case 'T': return currentKeyStates[SDL_SCANCODE_T];
-        case 'U': return currentKeyStates[SDL_SCANCODE_U];
-        case 'V': return currentKeyStates[SDL_SCANCODE_V];
-        case 'W': return currentKeyStates[SDL_SCANCODE_W];
-        case 'X': return currentKeyStates[SDL_SCANCODE_X];
-        case 'Y': return currentKeyStates[SDL_SCANCODE_Y];
-        case 'Z': return currentKeyStates[SDL_SCANCODE_Z];
-        case '0': return currentKeyStates[SDL_SCANCODE_0];
-        case '1': return currentKeyStates[SDL_SCANCODE_1];
-        case '2': return currentKeyStates[SDL_SCANCODE_2];
-        case '3': return currentKeyStates[SDL_SCANCODE_3];
-        case '4': return currentKeyStates[SDL_SCANCODE_4];
-        case '5': return currentKeyStates[SDL_SCANCODE_5];
-        case '6': return currentKeyStates[SDL_SCANCODE_6];
-        case '7': return currentKeyStates[SDL_SCANCODE_7];
-        case '8': return currentKeyStates[SDL_SCANCODE_8];
-        case '9': return currentKeyStates[SDL_SCANCODE_9];
-        case ' ': return currentKeyStates[SDL_SCANCODE_SPACE];
-        case UP_ARROW: return currentKeyStates[SDL_SCANCODE_UP];
-        case DOWN_ARROW: return currentKeyStates[SDL_SCANCODE_DOWN];
-        case LEFT_ARROW: return currentKeyStates[SDL_SCANCODE_LEFT];
-        case RIGHT_ARROW: return currentKeyStates[SDL_SCANCODE_RIGHT];
-        case SDL_SCANCODE_RETURN: return currentKeyStates[SDL_SCANCODE_RETURN];
-        default: return false;
-    }
-}
-
 void SDL_Plotter::plotPixel(int x, int y, int r, int g, int b){
     pixels[y * col + x] = RED_SHIFT*r + GREEN_SHIFT*g + BLUE_SHIFT*b;
-}
-
-void SDL_Plotter::plotPixel(int x, int y, const Color &color) {
-    pixels[y * col + x] = (Uint32)color;
 }
 
 void SDL_Plotter::clear(){
@@ -332,3 +273,5 @@ void SDL_Plotter::getMouseLocation(int& x, int& y){
     SDL_GetMouseState( &x, &y );
     cout << x << " " << y << endl;
 }
+
+

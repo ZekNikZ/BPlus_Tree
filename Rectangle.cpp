@@ -12,7 +12,7 @@ void Rectangle::draw(SDL_Plotter &g) {
     if (hasFill) {
         for (int row = coords.y; row < coords.y + coords.height; ++row) {
             for (int col = coords.x; col < coords.x + coords.width; ++col) {
-                g.plotPixel(col, row, fillColor);
+                g.plotPixel(col, row, fillColor.red, fillColor.green, fillColor.blue);
             }
         }
     }
@@ -22,7 +22,7 @@ void Rectangle::draw(SDL_Plotter &g) {
         ScreenAdjustedCoords coords2(g, x, y, width, outlineThickness);
         for (int row = coords2.y; row < coords2.y + coords2.height; ++row) {
             for (int col = coords2.x; col < coords2.x + coords2.width; ++col) {
-                g.plotPixel(col, row, outlineColor);
+                g.plotPixel(col, row, outlineColor.red, fillColor.green, fillColor.blue);
             }
         }
         // bottom outline
@@ -30,7 +30,7 @@ void Rectangle::draw(SDL_Plotter &g) {
                                      outlineThickness);
         for (int row = coords3.y; row < coords3.y + coords3.height; ++row) {
             for (int col = coords3.x; col < coords3.x + coords3.width; ++col) {
-                g.plotPixel(col, row, outlineColor);
+                g.plotPixel(col, row, outlineColor.red, fillColor.green, fillColor.blue);
             }
         }
 
@@ -38,7 +38,7 @@ void Rectangle::draw(SDL_Plotter &g) {
         ScreenAdjustedCoords coords4(g, x, y, outlineThickness, height);
         for (int row = coords4.y; row < coords4.y + coords4.height; ++row) {
             for (int col = coords4.x; col < coords4.x + coords4.width; ++col) {
-                g.plotPixel(col, row, outlineColor);
+                g.plotPixel(col, row, outlineColor.red, fillColor.green, fillColor.blue);
             }
         }
 
@@ -47,7 +47,7 @@ void Rectangle::draw(SDL_Plotter &g) {
                                      outlineThickness, height);
         for (int row = coords5.y; row < coords5.y + coords5.height; ++row) {
             for (int col = coords5.x; col < coords5.x + coords5.width; ++col) {
-                g.plotPixel(col, row, outlineColor);
+                g.plotPixel(col, row, outlineColor.red, fillColor.green, fillColor.blue);
             }
         }
     }

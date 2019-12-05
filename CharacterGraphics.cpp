@@ -20,7 +20,7 @@ void CharacterGraphics::draw(SDL_Plotter &p, int x, int y, char c) {
         for (int col = charIndex * width; col < charIndex * width + width; ++col) {
             Color& pixel = data[row * fullWidth + col];
             if (pixel.red == 0)
-            	p.plotPixel(x + col - charIndex * width, y + row, color);
+            	p.plotPixel(x + col - charIndex * width, y + row, color.red, color.green, color.blue);
         }
     }
 

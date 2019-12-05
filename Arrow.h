@@ -2,6 +2,7 @@
 #define LINE_H
 
 #include "SDL_Plotter.h"
+#include "Color.h"
 
 class Arrow {
 private:
