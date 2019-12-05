@@ -1,4 +1,5 @@
 #include <fstream>
+#include <cassert>
 #include "BitmapImage.h"
 #include "ScreenAdjustedCoords.h"
 
@@ -118,9 +119,7 @@ bool BitmapImage::load(istream &in, bool useTransparent, Color transparentColor)
             color.blue = read<unsigned char>(in);
             color.green = read<unsigned char>(in);
             color.red = read<unsigned char>(in);
-            if (useTransparent && color.red == transparentColor.red
-                && color.green == transparentColor.green
-                && color.blue == transparentColor.blue)
+            if (useTransparent && color == transparentColor)
             {
                 color.transparent = true;
             }
@@ -146,6 +145,25 @@ void BitmapImage::draw(SDL_Plotter &p, int x, int y) {
     for (int yPos = coords.y, imgRow = coords.topCutOff; yPos < coords.y + coords.height; ++yPos, ++imgRow) {
         for (int xPos = coords.x, imgCol = coords.leftCutOff; xPos < coords.x + coords.width; ++xPos, ++imgCol) {
             Color& c = data[imgRow*width + imgCol];
+            if (!c.transparent)
+                p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
+        }
+    }
+}
+
+void BitmapImage::drawPartial(SDL_Plotter &p, int x, int y, int colOffset, int rowOffset, int width, int height) {
+    assert(width <= this->width && height <= this->height);
+    ScreenAdjustedCoords coords{p, x, y, width, height};
+    // e.g: if 2 pixels got cut off at the top of the screen, start at row 2
+    for (int yPos = coords.y, imgRow = coords.topCutOff + rowOffset;
+        yPos < coords.y + coords.height;
+        ++yPos, ++imgRow)
+    {
+        for (int xPos = coords.x, imgCol = coords.leftCutOff + colOffset;
+            xPos < coords.x + coords.width;
+            ++xPos, ++imgCol)
+        {
+            Color& c = data[imgRow*this->width + imgCol];
             if (!c.transparent)
                 p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
         }

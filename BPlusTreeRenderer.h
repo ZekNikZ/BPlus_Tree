@@ -30,7 +30,7 @@ private:
 template <typename T>
 void BPlusTreeRenderer::drawNode(SDL_Plotter& g, const typename BPlusTree<T>::Node& node, int x, int y) {
     const int PADDING = 5;
-    const int CHAR_WIDTH = characters.getWidth();
+    const int CHAR_WIDTH = characters.getCharWidth();
     const int CHAR_HEIGHT = characters.getHeight();
     const int CHAR_SPACING = characters.getSpacing();
     

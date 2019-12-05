@@ -7,23 +7,14 @@
 
 #include "CharacterGraphics.h"
 
-CharacterGraphics::CharacterGraphics(const string& filepath, const string& chars, Color col) : BitmapImage(filepath), color(col), chars(chars) {
-	fullWidth = width;
-	width /= chars.length();
+CharacterGraphics::CharacterGraphics(const string& filepath, const string& chars, Color transparentCol) : BitmapImage(filepath, transparentCol), chars(chars) {
+	charWidth = width / chars.length();
 }
 
 void CharacterGraphics::draw(SDL_Plotter &p, int x, int y, char c) {
 	int charIndex = chars.find(c);
 
-    // TODO: Fix if part of it gets cut off at edge
-    for (int row = 0; row < height; ++row) {
-        for (int col = charIndex * width; col < charIndex * width + width; ++col) {
-            Color& pixel = data[row * fullWidth + col];
-            if (pixel.red == 0)
-            	p.plotPixel(x + col - charIndex * width, y + row, color.red, color.green, color.blue);
-        }
-    }
-
+	drawPartial(p, x, y, charIndex*charWidth, 0, charWidth, height);
 }
 
 void CharacterGraphics::draw(SDL_Plotter &p, int x, int y, const string& s) {
@@ -34,4 +25,9 @@ void CharacterGraphics::draw(SDL_Plotter &p, int x, int y, const string& s) {
 	}
 }
 
-void CharacterGraphics::setColor(Color col) { color = col;}
+void CharacterGraphics::setColor(Color col) {
+    for (Color& c : data) {
+        if (!c.transparent)
+            c = col;
+    }
+}

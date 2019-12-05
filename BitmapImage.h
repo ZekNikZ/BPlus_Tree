@@ -17,6 +17,7 @@ public:
     int getHeight() const { return height; }
 
     void draw(SDL_Plotter &p, int x, int y);
+    void drawPartial(SDL_Plotter& p, int x, int y, int colOffset, int rowOffset, int width, int height);
 
 protected:
     int32_t width;

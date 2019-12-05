@@ -17,17 +17,17 @@ using namespace std;
 class CharacterGraphics : public BitmapImage {
 private:
 	string chars;
-	Color color;
-	int fullWidth;
+	int charWidth;
 
 public:
-	CharacterGraphics(const string& filepath, const string& chars, Color col=Color::BLACK());
+	CharacterGraphics(const string& filepath, const string& chars, Color transparentCol=Color::WHITE());
 
 	void draw(SDL_Plotter &p, int x, int y, char c);
 	void draw(SDL_Plotter &p, int x, int y, const string& s);
 
 	void setColor(Color col);
 	int getWidth() {return width;}
+	int getCharWidth() { return charWidth; }
 	int getHeight() {return height;}
 	int getSpacing() {return 3;}
 };

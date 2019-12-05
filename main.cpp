@@ -21,7 +21,7 @@ int main() {
 
     int x = 10;
     int y = 10;
-    BitmapImage testImg("images/coolImage.bmp", Color{239, 228, 176});
+    BitmapImage testImg("images/coolImage.bmp");
 
     while (!plotter.getQuit()) {
         auto startTime = chrono::system_clock::now();
@@ -43,7 +43,7 @@ int main() {
 
 
         plotter.clear();
-        testImg.draw(plotter, x, y);
+        testImg.drawPartial(plotter, x, y, 50, 50, 200, 150);
         renderer.draw(plotter, tree, plotter.getCol() / 2, plotter.getRow() / 2);
         plotter.update();
 
