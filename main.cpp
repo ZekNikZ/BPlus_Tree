@@ -12,16 +12,16 @@
 using namespace std;
 
 int main() {
-    const int TARGET_FPS = 30;
-    const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
+    static const int TARGET_FPS = 30;
+    static const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
+    static const int TREE_MOVE_SPEED = 8;
+    int treeX = 0;
+    int treeY = 0;
 
     SDL_Plotter plotter(720, 960);
     BPlusTreeRenderer renderer;
     BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
 
-    int x = 10;
-    int y = 10;
-    BitmapImage testImg("images/coolImage.bmp");
 
     while (!plotter.getQuit()) {
         auto startTime = chrono::system_clock::now();
@@ -32,19 +32,18 @@ int main() {
         // Handle input
         switch (plotter.getKey()) {
             case UP_ARROW:
-                y -= 4; break;
+                treeY -= TREE_MOVE_SPEED; break;
             case DOWN_ARROW:
-                y += 4; break;
+                treeY += TREE_MOVE_SPEED; break;
             case LEFT_ARROW:
-                x -= 4; break;
+                treeX -= TREE_MOVE_SPEED; break;
             case RIGHT_ARROW:
-                x += 4; break;
+                treeX += TREE_MOVE_SPEED; break;
         }
 
 
         plotter.clear();
-        testImg.drawPartial(plotter, x, y, 50, 50, 200, 150);
-        renderer.draw(plotter, tree, plotter.getCol() / 2, plotter.getRow() / 2);
+        renderer.draw(plotter, tree, treeX, treeY);
         plotter.update();
 
         auto timeDiff = chrono::system_clock::now() - startTime;
