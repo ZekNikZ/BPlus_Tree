@@ -15,7 +15,7 @@ int main() {
     const int TARGET_FPS = 30;
     const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
 
-    SDL_Plotter plotter;
+    SDL_Plotter plotter(720, 960);
     BPlusTreeRenderer renderer;
     BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
 

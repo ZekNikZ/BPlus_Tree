@@ -36,6 +36,8 @@ public:
     int getToY() const { return toY; }
 
     void setToY(int toY) { this->toY = toY; }
+
+    static void drawArrow(SDL_Plotter &g, int fromX, int fromY, int toX, int toY, int thickness = 1, Color c = Color::BLACK());
 };
 
 #endif // LINE_H

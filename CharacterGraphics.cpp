@@ -21,7 +21,7 @@ void CharacterGraphics::draw(SDL_Plotter &p, int x, int y, const string& s) {
 	const int SPACING = getSpacing();
 
 	for (int i = 0; i < s.length(); ++i) {
-		draw(p, x + (width + SPACING) * i, y, s[i]);
+		draw(p, x + (charWidth + SPACING) * i, y, s[i]);
 	}
 }
 
