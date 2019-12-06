@@ -139,11 +139,11 @@ bool BitmapImage::load(istream &in, bool useTransparent, Color transparentColor)
     return true;
 }
 
-void BitmapImage::draw(SDL_Plotter &p, int x, int y) {
+void BitmapImage::draw(SDL_Plotter &p, int x, int y) const {
     drawPartial(p, x, y, 0, 0, width, height);
 }
 
-void BitmapImage::drawPartial(SDL_Plotter &p, int x, int y, int colOffset, int rowOffset, int width, int height) {
+void BitmapImage::drawPartial(SDL_Plotter &p, int x, int y, int colOffset, int rowOffset, int width, int height) const {
     assert(width <= this->width && height <= this->height);
     ScreenArea coords{p, x, y, width, height};
     // e.g: if 2 pixels got cut off at the top of the screen, start at row 2
@@ -151,7 +151,7 @@ void BitmapImage::drawPartial(SDL_Plotter &p, int x, int y, int colOffset, int r
     for (int yPos = coords.top(); yPos <= coords.bottom(); ++yPos) {
         int imgCol = coords.leftCutOff() + colOffset;
         for (int xPos = coords.left(); xPos <= coords.right(); ++xPos) {
-            Color& c = data[imgRow*this->width + imgCol];
+            const Color& c = data[imgRow*this->width + imgCol];
             if (!c.transparent)
                 p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
             ++imgCol;

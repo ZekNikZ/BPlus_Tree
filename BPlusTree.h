@@ -246,7 +246,7 @@ void BPlusTree<T>::insert(const T &val) {
 
 template<typename T>
 void BPlusTree<T>::remove(const T &val) {
-    assert(NOT_IMPLEMENTED);
+    cout << "Removing " << val << endl;
 }
 
 template<typename T>
