@@ -125,17 +125,17 @@ BPlusTree<T>& BPlusTree<T>::operator=(BPlusTree &&other) {
 
 template<typename T>
 void BPlusTree<T>::insert(const T &val) {
-    assert(NOT_IMPLEMENTED);
+    cout << "Inserting " << val << endl;
 }
 
 template<typename T>
 void BPlusTree<T>::remove(const T &val) {
-    assert(NOT_IMPLEMENTED);
+    cout << "Removing " << val << endl;
 }
 
 template<typename T>
 void BPlusTree<T>::makeEmpty() {
-    assert(NOT_IMPLEMENTED);
+    cout << "Making empty\n";
 }
 
 template<typename T>

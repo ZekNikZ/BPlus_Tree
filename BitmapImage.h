@@ -59,7 +59,7 @@ public:
      * @param x The x-coordinate of the top-left of the image.
      * @param y The y-coordinate of the top-right of the image.
      */
-    void draw(SDL_Plotter &p, int x, int y);
+    void draw(SDL_Plotter &p, int x, int y) const;
 
     /**
      * Draws only a portion of the image to the given SDL_Plotter at the
@@ -74,7 +74,7 @@ public:
      * @param width The width to draw after colOffset.
      * @param height The height to draw after rowOffset.
      */
-    void drawPartial(SDL_Plotter& p, int x, int y, int colOffset, int rowOffset, int width, int height);
+    void drawPartial(SDL_Plotter& p, int x, int y, int colOffset, int rowOffset, int width, int height) const;
 
 protected:
     int32_t width;
