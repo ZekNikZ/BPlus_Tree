@@ -8,6 +8,20 @@ void Arrow::draw(SDL_Plotter &g) {
 
 
 void Arrow::drawArrow(SDL_Plotter &g, int fromX, int fromY, int toX, int toY, int thickness, Color c) {
+	const double PI = acos(-1);
+	const double ARROWHEAD_ANGLE = PI / 4;
+	const int ARROW_LENGTH = 6;
+
+	// Draw body of arrow
+	drawLine(g, fromX, fromY, toX, toY, thickness, c);
+
+	// Draw arrowhead
+	double arrowAngle = atan2(toY - fromY, toX - fromX);
+	drawLine(g, toX, toY, toX + (ARROW_LENGTH * cos(PI - ARROWHEAD_ANGLE + arrowAngle)), toY + (ARROW_LENGTH * sin(PI - ARROWHEAD_ANGLE + arrowAngle)), thickness, c);
+	drawLine(g, toX, toY, toX + (ARROW_LENGTH * cos(ARROWHEAD_ANGLE - PI + arrowAngle)), toY + (ARROW_LENGTH * sin(ARROWHEAD_ANGLE - PI + arrowAngle)), thickness, c);
+}
+
+void Arrow::drawLine(SDL_Plotter &g, int fromX, int fromY, int toX, int toY, int thickness, Color c) {
 	int xDiff = toX - fromX;
 	int yDiff = toY - fromY;
 	float length = sqrt(xDiff*xDiff + yDiff*yDiff);

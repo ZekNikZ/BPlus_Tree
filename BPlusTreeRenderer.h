@@ -40,19 +40,27 @@ private:
 };
 
 //   explicit Rectangle(int x = 0, int y = 0, int width = 0, int height = 0, int outlineThickness = 1, Color outlineColor = Color::BLACK(), bool fill = false, Color fillColor = Color::BLACK())
+static const int PADDING = 8;
 template <typename T>
 void BPlusTreeRenderer::drawNode(SDL_Plotter& g, RendNode<T> * rendNode, int x, int y) {
-    const int PADDING = 5;
-    const int CHAR_WIDTH = characters.getCharWidth();
-    const int CHAR_HEIGHT = characters.getHeight();
-    const int CHAR_SPACING = characters.getSpacing();
+    static const int CHAR_WIDTH = characters.getCharWidth();
+    static const int CHAR_HEIGHT = characters.getHeight();
+    static const int CHAR_SPACING = characters.getSpacing();
+
+    // Colors
+    static const Color DATA_OUTLINE(82, 169, 250);
+    static const Color DATA_BACKGROUND(173, 216, 255);
+    static const Color KEY_OUTLINE(68, 227, 142);
+    static const Color KEY_BACKGROUND(173, 255, 187);
 
     // Helper variables
     stringstream ss;
     string s;
 
     // Setup working rectangle
-    Rectangle cell(0, 0, 0, 2 * PADDING + CHAR_HEIGHT, 1, rendNode->node->type == BPlusTree<T>::Node::KEY ? Color::BLUE() : Color::GREEN(), true, rendNode->node->type == BPlusTree<T>::Node::KEY ? Color::GREEN() : Color::YELLOW());
+    Rectangle cell(0, 0, 0, 2 * PADDING + CHAR_HEIGHT, 1,
+    		rendNode->node->type == BPlusTree<T>::Node::KEY ? KEY_OUTLINE : DATA_OUTLINE, true,
+    				rendNode->node->type == BPlusTree<T>::Node::KEY ? KEY_BACKGROUND : DATA_BACKGROUND);
     cell.shiftX(x);
     cell.shiftY(y);
     Rectangle nodeRect = cell;
@@ -82,12 +90,10 @@ void BPlusTreeRenderer::drawNode(SDL_Plotter& g, RendNode<T> * rendNode, int x, 
     nodeRect.draw(g);
 }
 
-const int PADDING = 5;
 template <typename T>
 int BPlusTreeRenderer::getRenderedNodeWidth(typename BPlusTree<T>::Node * node) {
-    const int CHAR_WIDTH = characters.getCharWidth();
-    const int CHAR_HEIGHT = characters.getHeight();
-    const int CHAR_SPACING = characters.getSpacing();
+    static const int CHAR_WIDTH = characters.getCharWidth();
+    static const int CHAR_SPACING = characters.getSpacing();
 
     // Helper variables
     stringstream ss;
@@ -114,9 +120,10 @@ int BPlusTreeRenderer::getRenderedNodeWidth(typename BPlusTree<T>::Node * node) 
 
 template<typename T>
 void BPlusTreeRenderer::draw(SDL_Plotter &g, const BPlusTree<T> &tree, int x, int y) {
-	const int MIN_SPACE_BETWEEN_NODES = 10;
-	const int LEVEL_SEPARATION = 20;
-	const int CHAR_HEIGHT = characters.getHeight();
+	static const int MIN_SPACE_BETWEEN_NODES = 15;
+	static const int LEVEL_SEPARATION = 20;
+	static const int CHAR_HEIGHT = characters.getHeight();
+	static const Color ARROW_COLOR(120, 120, 120);
 
 	vector<vector<RendNode<T> *>> levels;
 
@@ -145,11 +152,11 @@ void BPlusTreeRenderer::draw(SDL_Plotter &g, const BPlusTree<T> &tree, int x, in
 
 	// Compute total tree height
 	int rowHeight = (2 * PADDING + CHAR_HEIGHT);
-	int totalTreeHeight = rowHeight * levels.size() + LEVEL_SEPARATION * (levels.back().size() - 1);
+	int totalTreeHeight = rowHeight * levels.size() + LEVEL_SEPARATION * (levels.size() - 1);
 
 	// Compute starting x and y location for drawing
-	int xDraw = (g.getCol() - bottomLevelWidth) / 2;
-	int yDraw = (g.getRow() - totalTreeHeight) - rowHeight;
+	int xDraw = (g.getCol() - bottomLevelWidth) / 2 + x;
+	int yDraw = (g.getRow() - totalTreeHeight) / 2 + totalTreeHeight - rowHeight + y;
 
 	// Draw bottom row
 	for (auto it = levels.back().begin(); it != levels.back().end(); ++it) {
