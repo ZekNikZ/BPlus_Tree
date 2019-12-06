@@ -9,4 +9,4 @@ link_libraries(SDL2_mixer)
 add_executable(BPlus_Tree main.cpp SDL_Plotter.h SDL_Plotter.cpp BitmapImage.cpp
         BitmapImage.h BPlusTree.h Arrow.h Rectangle.h BPlusTreeRenderer.h
         SDL_Plotter.h SDL_Plotter.cpp Color.h BPlusTreeRenderer.cpp Rectangle.cpp
-        ScreenAdjustedCoords.h Arrow.cpp CharacterGraphics.h CharacterGraphics.cpp SDL_Plotter.h SDL_Plotter.cpp)
+        ScreenArea.h Arrow.cpp CharacterGraphics.h CharacterGraphics.cpp SDL_Plotter.h SDL_Plotter.cpp ScreenArea.cpp)

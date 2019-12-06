@@ -1,7 +1,7 @@
 #include <fstream>
 #include <cassert>
 #include "BitmapImage.h"
-#include "ScreenAdjustedCoords.h"
+#include "ScreenArea.h"
 
 BitmapImage::BitmapImage(const string &filepath) {
     width = height = 0;
@@ -140,32 +140,23 @@ bool BitmapImage::load(istream &in, bool useTransparent, Color transparentColor)
 }
 
 void BitmapImage::draw(SDL_Plotter &p, int x, int y) {
-    ScreenAdjustedCoords coords{p, x, y, width, height};
-    // e.g: if 2 pixels got cut off at the top of the screen, start at row 2
-    for (int yPos = coords.y, imgRow = coords.topCutOff; yPos < coords.y + coords.height; ++yPos, ++imgRow) {
-        for (int xPos = coords.x, imgCol = coords.leftCutOff; xPos < coords.x + coords.width; ++xPos, ++imgCol) {
-            Color& c = data[imgRow*width + imgCol];
-            if (!c.transparent)
-                p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
-        }
-    }
+    drawPartial(p, x, y, 0, 0, width, height);
 }
 
 void BitmapImage::drawPartial(SDL_Plotter &p, int x, int y, int colOffset, int rowOffset, int width, int height) {
     assert(width <= this->width && height <= this->height);
-    ScreenAdjustedCoords coords{p, x, y, width, height};
+    ScreenArea coords{p, x, y, width, height};
     // e.g: if 2 pixels got cut off at the top of the screen, start at row 2
-    for (int yPos = coords.y, imgRow = coords.topCutOff + rowOffset;
-        yPos < coords.y + coords.height;
-        ++yPos, ++imgRow)
-    {
-        for (int xPos = coords.x, imgCol = coords.leftCutOff + colOffset;
-            xPos < coords.x + coords.width;
-            ++xPos, ++imgCol)
-        {
+    int imgRow = coords.topCutOff() + rowOffset;
+    for (int yPos = coords.top(); yPos <= coords.bottom(); ++yPos) {
+        int imgCol = coords.leftCutOff() + colOffset;
+        for (int xPos = coords.left(); xPos <= coords.right(); ++xPos) {
             Color& c = data[imgRow*this->width + imgCol];
             if (!c.transparent)
                 p.plotPixel(xPos, yPos, c.red, c.green, c.blue);
+            ++imgCol;
         }
+
+        ++imgRow;
     }
 }

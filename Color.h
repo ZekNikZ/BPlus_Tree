@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+/**
+ * Represents an RGB color that can be transparent.
+ */
 struct Color {
     uint8_t red;
     uint8_t green;
@@ -15,6 +18,12 @@ struct Color {
 
     }
 
+    /**
+     * Returns whether the RGB color value is the same, but not necessarily
+     *   the transparency.
+     * @param other The color to compare to.
+     * @return Whether the RGB color value is the same
+     */
     bool operator==(const Color& other) {
         return red == other.red && green == other.green && blue == other.blue;
     }

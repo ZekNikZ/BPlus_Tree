@@ -4,6 +4,9 @@
 #include "SDL_Plotter.h"
 #include "Color.h"
 
+/**
+ * Represents a visible rectangle at a location with or without an outline and fill.
+ */
 class Rectangle {
 private:
     int x, y;
@@ -14,6 +17,17 @@ private:
     Color fillColor;
 
 public:
+    /**
+     * Creates a rectangle
+     * @param x x-coordinate of the top-left of the rectangle
+     * @param y y-coordinate of the top-left of the rectangle
+     * @param width Width of the rectangle
+     * @param height Height of the rectangle
+     * @param outlineThickness Thickness of the rectangle's outline. Set to 0 for no outline.
+     * @param outlineColor Color of the rectangle's outline.
+     * @param fill Whether to fill the rectangle or not.
+     * @param fillColor The color to fill the rectangle with. Ignored if fill=false.
+     */
     explicit Rectangle(int x = 0, int y = 0, int width = 0, int height = 0,
             int outlineThickness = 1, Color outlineColor = Color::BLACK(), bool fill = false,
             Color fillColor = Color::BLACK())
@@ -23,6 +37,10 @@ public:
 
     }
 
+    /**
+     * Draws the rectangle to a SDL_Plotter.
+     * @param g The plotter to draw on.
+     */
     void draw(SDL_Plotter& g);
 
     int getX() const { return x; }
@@ -36,7 +54,7 @@ public:
 
     int getHeight() const { return this->height; }
     void setHeight(int height) { this->height = height; }
-    
+
     void shiftX(int dx) {x += dx;}
     void shiftY(int dy) {y += dy;}
     void stretchX(int dx) {width += dx;}
