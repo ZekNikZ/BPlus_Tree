@@ -22,7 +22,7 @@ void Rectangle::draw(SDL_Plotter &g) {
         coords = ScreenArea(g, x, y, width, outlineThickness);
         for (int row = coords.top(); row <= coords.bottom(); ++row) {
             for (int col = coords.left(); col <= coords.right(); ++col) {
-                g.plotPixel(col, row, fillColor.red, fillColor.green, fillColor.blue);
+                g.plotPixel(col, row, outlineColor.red, outlineColor.green, outlineColor.blue);
             }
         }
 
@@ -31,7 +31,7 @@ void Rectangle::draw(SDL_Plotter &g) {
                            outlineThickness);
         for (int row = coords.top(); row <= coords.bottom(); ++row) {
             for (int col = coords.left(); col <= coords.right(); ++col) {
-                g.plotPixel(col, row, fillColor.red, fillColor.green, fillColor.blue);
+                g.plotPixel(col, row, outlineColor.red, outlineColor.green, outlineColor.blue);
             }
         }
 
@@ -39,7 +39,7 @@ void Rectangle::draw(SDL_Plotter &g) {
         coords = ScreenArea(g, x, y, outlineThickness, height);
         for (int row = coords.top(); row <= coords.bottom(); ++row) {
             for (int col = coords.left(); col <= coords.right(); ++col) {
-                g.plotPixel(col, row, fillColor.red, fillColor.green, fillColor.blue);
+                g.plotPixel(col, row, outlineColor.red, outlineColor.green, outlineColor.blue);
             }
         }
 
@@ -48,7 +48,7 @@ void Rectangle::draw(SDL_Plotter &g) {
                            outlineThickness, height);
         for (int row = coords.top(); row <= coords.bottom(); ++row) {
             for (int col = coords.left(); col <= coords.right(); ++col) {
-                g.plotPixel(col, row, fillColor.red, fillColor.green, fillColor.blue);
+                g.plotPixel(col, row, outlineColor.red, outlineColor.green, outlineColor.blue);
             }
         }
     }
