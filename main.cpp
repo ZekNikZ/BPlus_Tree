@@ -26,6 +26,8 @@ int main(int argc, char* argv[]) {
     string input;
     CharacterGraphics inputFont("images/ubuntu-mono-48pt.bmp", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 
+    BitmapImage cheesyChristmasBackground("images/christmasBg.bmp");
+
     while (!plotter.getQuit()) {
         auto startTime = chrono::system_clock::now();
         // Poll for events
@@ -59,8 +61,9 @@ int main(int argc, char* argv[]) {
         }
 
         plotter.clear();
+        cheesyChristmasBackground.draw(plotter, 0, 0);
         renderer.draw(plotter, tree, treeX, treeY);
-        inputFont.draw(plotter, 10, 10, input);
+        inputFont.draw(plotter, 10, plotter.getRow() - inputFont.getHeight(), input);
         plotter.update();
 
         auto timeDiff = chrono::system_clock::now() - startTime;
