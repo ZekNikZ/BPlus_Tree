@@ -1,4 +1,3 @@
-#define SDL_MAIN_HANDLED
 #include <iostream>
 #include "SDL_Plotter.h"
 #include "BitmapImage.h"
@@ -11,7 +10,7 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
     static const int TARGET_FPS = 30;
     static const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
     static const int TREE_MOVE_SPEED = 8;
