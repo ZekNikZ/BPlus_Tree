@@ -9,33 +9,33 @@
 using namespace std;
 
 template<typename T>
+struct Node {
+    enum NodeType {
+        KEY,
+        DATA
+    };
+
+    explicit Node(NodeType type = DATA) : type{type} {}
+    const vector<Node*>& getPointers() const { return ptrs; }
+    NodeType getType() const {return type; }
+    NodeType type;       // type of node
+    vector<Node *> ptrs; // pointers (KEY: pointers to other nodes, DATA: pointer to next data node)
+    vector<T> vals;      // values (KEY: keys, DATA: data)
+};
+
+template<typename T>
 class BPlusTree {
+    template<typename R>
     friend class BPlusTreeRenderer;
+    template<typename R>
+    friend void handleInput(BPlusTree<R>& tree, const string& input);
 
 private:
-    class Node {
-        friend class BPlusTree;
-        friend class BPlusTreeRenderer;
-        friend BPlusTree BPlusTree::makeTestTree();
 
-    public:
-        enum NodeType {
-            KEY,
-            DATA
-        };
-
-        explicit Node(NodeType type = DATA) : type{type} {}
-        const vector<Node*>& getPointers() const { return ptrs; }
-        NodeType getType() const {return type; }
-    private:
-        NodeType type;       // type of node
-        vector<Node *> ptrs; // pointers (KEY: pointers to other nodes, DATA: pointer to next data node)
-        vector<T> vals;      // values (KEY: keys, DATA: data)
-    };
 
     size_t M;    // order of table
     size_t L;    // amount of data in data nodes
-    Node* root;  // root
+    Node<T> * root;  // root
     //TODO: Is the the amount of data stored at the bottom in the data nodes,
     // or for all nodes?
     // ^ Amount of Data ^
@@ -69,6 +69,7 @@ public:
 // Getters
     // get M
     size_t getM() const;
+    size_t getL() const;
     // does the tree contain val?
     bool contains(const T & val) const;
     // is the tree empty? (root==nullptr)
@@ -96,13 +97,13 @@ BPlusTree<T>::BPlusTree(size_t M, size_t L)
 
 template<typename T>
 BPlusTree<T>::~BPlusTree() {
-    stack<Node*> toDelete;
+    stack<Node<T>*> toDelete;
     toDelete.push(root);
     while (!toDelete.empty()) {
-        Node* node = toDelete.top();
+        Node<T>* node = toDelete.top();
         toDelete.pop();
-        if (node->getType() == Node::KEY) {
-            for (Node* n : node->getPointers()) {
+        if (node->getType() == Node<T>::KEY) {
+            for (Node<T>* n : node->getPointers()) {
                 toDelete.push(n);
             }
         }
@@ -137,14 +138,14 @@ void BPlusTree<T>::insert(const T &val) {
     // check if there is an exisiting tree of not
     if (root == nullptr){
         //if tree does not extist create a new data node with val
-        root = new Node;
+        root = new Node<T>;
         root->vals.push_back(val);
     } else {
         // if a tree does exist
-        Node* current = root;
-        vector<Node*> prev;
+        Node<T>* current = root;
+        vector<Node<T>*> prev;
         prev.push_back(current);
-        while (current->getType() == Node::KEY){
+        while (current->getType() == Node<T>::KEY){
             
             for (int i = 0; i < current->vals.size(); i++) {
                 if (val < current->vals[i]){
@@ -175,11 +176,11 @@ void BPlusTree<T>::insert(const T &val) {
                 // get the value of the num pushed to a key
                 T num = prev.back()->vals[index];
                 // save the initial value of pointer and of the last visited
-                Node* initBack = prev.back();
+                Node<T>* initBack = prev.back();
                 // if the node that need to be fixed is the root create a
                 // new root KEY node that points to current data and add it to previous
                 if (root == prev.back()){
-                    root = new Node(Node::KEY);
+                    root = new Node<T>(Node<T>::KEY);
                     root->ptrs.push_back(prev.back());
                     prev.insert(prev.begin(), root);
                 }
@@ -192,7 +193,7 @@ void BPlusTree<T>::insert(const T &val) {
                         // move the num into the previous's values at index
                         prev.back()->vals.insert(prev.back()->vals.begin() + i, num);
                         // make a new KEY node in previous' pointrs at index
-                        prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node(Node::KEY));
+                        prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node<T>(Node<T>::KEY));
                         
                         // move the value at index and beyond to the new node's values
                         for (size_t j = index + 1; j < initBack->vals.size(); j++) {
@@ -219,7 +220,7 @@ void BPlusTree<T>::insert(const T &val) {
                     // move the num into the previous's values at index
                     prev.back()->vals.insert(prev.back()->vals.end(), num);
                     
-                    prev.back()->ptrs.insert(prev.back()->ptrs.end(), new Node(Node::KEY));
+                    prev.back()->ptrs.insert(prev.back()->ptrs.end(), new Node<T>(Node<T>::KEY));
                     
                     // move the value at index and beyond to the new node's values
                     for (size_t j = index + 1; j < initBack->vals.size(); j++) {
@@ -245,7 +246,7 @@ void BPlusTree<T>::insert(const T &val) {
                 // if the node that need to be fixed is the root create a
                 // new root KEY node that points to current data and add it to previous
                 if (root == prev.back()){
-                    root = new Node(Node::KEY);
+                    root = new Node<T>(Node<T>::KEY);
                     root->ptrs.push_back(prev.back());
                     prev.insert(prev.begin(), root);
                 }
@@ -259,7 +260,7 @@ void BPlusTree<T>::insert(const T &val) {
                         prev.back()->vals.insert(prev.back()->vals.begin() + i, num);
                         // create a new pointer to a node into the previous node's pointers at index
                         // the index is index + 1, ptrs has 1 when created and pointer right is greater than equal to val
-                        prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node);
+                        prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node<T>);
                         
                         // move the value at index and beyond to the new node's values
                         for (size_t j = index; j < current->vals.size(); j++) {
@@ -279,7 +280,7 @@ void BPlusTree<T>::insert(const T &val) {
                 if (!fixed){
                     // insert the number at the
                     prev.back()->vals.push_back(num);
-                    prev.back()->ptrs.push_back(new Node);
+                    prev.back()->ptrs.push_back(new Node<T>);
 
                     // move the value at index and beyond to the new node's values
                     for (size_t j = index; j < current->vals.size(); j++) {
@@ -308,13 +309,13 @@ void BPlusTree<T>::remove(const T &val) {
 template<typename T>
 void BPlusTree<T>::makeEmpty() {
     if (root != nullptr){
-        stack<Node*> toDelete;
+        stack<Node<T>*> toDelete;
         toDelete.push(root);
         while (!toDelete.empty()) {
-            Node* node = toDelete.top();
+            Node<T>* node = toDelete.top();
             toDelete.pop();
-            if (node->getType() == Node::KEY) {
-                for (Node* n : node->getPointers()) {
+            if (node->getType() == Node<T>::KEY) {
+                for (Node<T>* n : node->getPointers()) {
                     toDelete.push(n);
                 }
             }
@@ -329,6 +330,10 @@ size_t BPlusTree<T>::getM() const {
     return M;
 }
 
+template<typename T>
+size_t BPlusTree<T>::getL() const {
+    return L;
+}
 template<typename T>
 bool BPlusTree<T>::contains(const T &val) const {
     assert(NOT_IMPLEMENTED);
@@ -346,39 +351,39 @@ ostream &operator<<(ostream &out, const BPlusTree<Key> &tree) {
 
 template <class T>
 BPlusTree<T> BPlusTree<T>::makeTestTree() {
-    auto bottom8 = new Node(Node::DATA);
+    auto bottom8 = new Node<T>(Node<T>::DATA);
     bottom8->vals = {987, 1597, 9999};
     bottom8->ptrs = {nullptr};
-    auto bottom7 = new Node(Node::DATA);
+    auto bottom7 = new Node<T>(Node<T>::DATA);
     bottom7->vals = {377, 610};
     bottom7->ptrs = {bottom8};
-    auto bottom6 = new Node(Node::DATA);
+    auto bottom6 = new Node<T>(Node<T>::DATA);
     bottom6->vals = {144, 233};
     bottom6->ptrs = {bottom7};
-    auto bottom5 = new Node(Node::DATA);
+    auto bottom5 = new Node<T>(Node<T>::DATA);
     bottom5->vals = {55, 89};
     bottom5->ptrs = {bottom6};
-    auto bottom4 = new Node(Node::DATA);
+    auto bottom4 = new Node<T>(Node<T>::DATA);
     bottom4->vals = {21, 34};
     bottom4->ptrs = {bottom5};
-    auto bottom3 = new Node(Node::DATA);
+    auto bottom3 = new Node<T>(Node<T>::DATA);
     bottom3->vals = {8, 13};
     bottom3->ptrs = {bottom4};
-    auto bottom2 = new Node(Node::DATA);
+    auto bottom2 = new Node<T>(Node<T>::DATA);
     bottom2->vals = {3, 5};
     bottom2->ptrs = {bottom3};
-    auto bottom1 = new Node(Node::DATA);
+    auto bottom1 = new Node<T>(Node<T>::DATA);
     bottom1->vals = {1, 2};
     bottom1->ptrs = {bottom2};
 
-    auto midLeft = new Node(Node::KEY);
+    auto midLeft = new Node<T>(Node<T>::KEY);
     midLeft->vals = {3, 8};
     midLeft->ptrs = {bottom1, bottom2, bottom3};
-    auto midRight = new Node(Node::KEY);
+    auto midRight = new Node<T>(Node<T>::KEY);
     midRight->vals = {55, 144, 377, 987};
     midRight->ptrs = {bottom4, bottom5, bottom6, bottom7, bottom8};
 
-    auto top = new Node(Node::KEY);
+    auto top = new Node<T>(Node<T>::KEY);
     top->vals = {21};
     top->ptrs = {midLeft, midRight};
 
