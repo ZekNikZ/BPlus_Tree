@@ -125,6 +125,8 @@ void BPlusTreeRenderer::draw(SDL_Plotter &g, const BPlusTree<T> &tree, int x, in
 	static const int CHAR_HEIGHT = characters.getHeight();
 	static const Color ARROW_COLOR(120, 120, 120);
 
+	if (tree.size == 0) return;
+
 	vector<vector<RendNode<T> *>> levels;
 
 	levels.push_back(vector<RendNode<T> *>());
