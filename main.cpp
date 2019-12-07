@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     static const int TREE_MOVE_SPEED = 8;
 
     SDL_Plotter plotter(720, 960);
-    BPlusTreeRenderer renderer;
+    BPlusTreeRenderer<int> renderer;
 
     BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
     int treeX = 0;
