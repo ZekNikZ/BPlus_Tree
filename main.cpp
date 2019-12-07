@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     static const int TREE_MOVE_SPEED = 8;
 
     SDL_Plotter plotter(720, 960);
-    BPlusTreeRenderer renderer;
+    BPlusTreeRenderer<int> renderer;
 
     BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
     int treeX = 0;
@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
 
     string input;
     CharacterGraphics inputFont("images/ubuntu-mono-48pt.bmp", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+    CharacterGraphics infoFont("images/ubuntu-mono-24pt.bmp", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 
     BitmapImage cheesyChristmasBackground("images/christmasBg.bmp");
 
@@ -64,6 +65,9 @@ int main(int argc, char* argv[]) {
         cheesyChristmasBackground.draw(plotter, 0, 0);
         renderer.draw(plotter, tree, treeX, treeY);
         inputFont.draw(plotter, 10, plotter.getRow() - inputFont.getHeight(), input);
+        ostringstream info;
+        info << "M " << tree.getM() << "   L " << tree.getL() << "         INSERT  REMOVE  MAKE EMPTY  SETM  SETL  SETML";
+        infoFont.draw(plotter,10, plotter.getRow() - 30, info.str());
         plotter.update();
 
         auto timeDiff = chrono::system_clock::now() - startTime;
@@ -90,10 +94,24 @@ void handleInput(BPlusTree<T>& tree, const string& input) {
     string command, arg;
     ss >> command >> arg;
 
-    if (command == "INSERT")
+    if (command == "INSERT" || command == "I") {
         tree.insert(parseArg<T>(arg));
-    else if (command == "REMOVE")
+    } else if (command == "REMOVE" || command == "R") {
         tree.remove(parseArg<T>(arg));
-    else if (command == "MAKE" && arg == "EMPTY")
+    } else if ((command == "MAKE" && arg == "EMPTY") || (command == "M" && arg == "E") || command == "CLEAR") {
         tree.makeEmpty();
+    } else if (command == "SETM" || command == "M") { // TODO: ensure M>2
+        tree.makeEmpty();
+        tree.M = parseArg<int>(arg);
+        tree.L = tree.M - 1;
+    } else if (command == "SETL" || command == "L") { // TODO: ensure L > 1
+        tree.makeEmpty();
+        tree.L = parseArg<int>(arg);
+    } else if (command == "SETML" || command == "ML") { // TODO: ensure M>2 ensure L > 1
+        tree.makeEmpty();
+        tree.M = parseArg<int>(arg);
+        ss >> tree.L;
+    } else if (command == "QUIT" || command == "Q") {
+        exit(0);
+    }
 }
