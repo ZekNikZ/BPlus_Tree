@@ -28,7 +28,7 @@ private:
         const vector<Node*>& getPointers() const { return ptrs; }
         NodeType getType() const {return type; }
     private:
-        NodeType type;       // type of noiide
+        NodeType type;       // type of node
         vector<Node *> ptrs; // pointers (KEY: pointers to other nodes, DATA: pointer to next data node)
         vector<T> vals;      // values (KEY: keys, DATA: data)
     };
@@ -170,7 +170,7 @@ void BPlusTree<T>::insert(const T &val) {
             if (prev.back()->ptrs.size() > M){
                 size_t index = M / 2;
                 // get the value of the num pushed to a key
-                T num = ptr->vals[index];
+                T num = prev.back()->vals[index];
                 // save the initial value of pointer and of the last visited
                 Node* init = ptr, *initBack = prev.back();
                 if (root == initBack){
@@ -182,20 +182,45 @@ void BPlusTree<T>::insert(const T &val) {
                 }
                 prev.pop_back();
                     
-                for (int i = 0; i <= initBack->vals.size(); i++) {
+                for (int i = 0; i < prev.back()->vals.size(); i++) {
                     if (prev.back()->ptrs.size() == 1 || prev.back()->vals[i] >= num){
                         fixed = true;
                         prev.back()->vals.insert(prev.back()->vals.begin() + i, num);
                         prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node);
-                        prev.back()->type = Node::KEY;
+                        prev.back()->ptrs[i+1]->type = Node::KEY;
                         
-                        for (size_t j = index; j < init->vals.size(); j++) {
-                            prev.back()->ptrs[i+1]->vals.push_back(init->vals[j]);
+                        //TODO: make these two loops into one loop
+                        for (size_t j = index+1; j < initBack->vals.size(); j++) {
+                            prev.back()->ptrs[i+1]->vals.push_back(initBack->vals[j]);
                         }
-                        for (size_t j = index; j <= init->vals.size(); j++) {
-                            init->vals.pop_back();
+                        for (size_t j = index; j <= initBack->vals.size(); j++) {
+                            initBack->vals.pop_back();
                         }
+                        for ( size_t j = index + 1; j < initBack->ptrs.size(); j++){
+                            prev.back()->ptrs[i+1]->ptrs.push_back(initBack->ptrs[j]);
+                        }
+                        for (size_t j = index + 1; j <= initBack->ptrs.size(); j++) {
+                            initBack->ptrs.pop_back();
+                        }
+                        
                         break;
+                    }
+                }
+                if (!fixed){
+                    prev.back()->vals.insert(prev.back()->vals.end(), num);
+                    prev.back()->ptrs.insert(prev.back()->ptrs.end(), new Node);
+                    prev.back()->ptrs.back()->type = Node::KEY;
+                    for (size_t j = index+1; j < initBack->vals.size(); j++) {
+                        prev.back()->ptrs.back()->vals.push_back(initBack->vals[j]);
+                    }
+                    for (size_t j = index; j <= initBack->vals.size(); j++) {
+                        initBack->vals.pop_back();
+                    }
+                    for ( size_t j = index + 1; j < initBack->ptrs.size(); j++){
+                        prev.back()->ptrs.back()->ptrs.push_back(initBack->ptrs[j]);
+                    }
+                    for (size_t j = index + 1; j <= initBack->ptrs.size(); j++) {
+                        initBack->ptrs.pop_back();
                     }
                 }
             } else if (prev.back()->vals.size() > L){
@@ -216,7 +241,7 @@ void BPlusTree<T>::insert(const T &val) {
                 ptr = prev.back();
                 prev.pop_back();
                     
-                for (int i = 0; i < initBack->vals.size(); i++) {
+                for (int i = 0; i < prev.back()->vals.size(); i++) {
                     /// currect bug is here when the keys are the part that need to be resized
                     if (prev.back()->vals.size() == 0 || prev.back()->vals[i] >= num){
                         fixed = true;
@@ -224,7 +249,7 @@ void BPlusTree<T>::insert(const T &val) {
                         // this prev.back() is not pointing to the correct value
                         prev.back()->vals.insert(prev.back()->vals.begin() + i, num);
                         prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node);
-                        prev.back()->type = Node::KEY;
+                        //prev.back()->type = Node::KEY;
                         
                         for (size_t j = index; j < init->vals.size(); j++) {
                             prev.back()->ptrs[i+1]->vals.push_back(init->vals[j]);
@@ -233,6 +258,18 @@ void BPlusTree<T>::insert(const T &val) {
                             init->vals.pop_back();
                         }
                         break;
+                    }
+                }
+                if (!fixed){
+                    prev.back()->vals.insert(prev.back()->vals.end(), num);
+                    prev.back()->ptrs.insert(prev.back()->ptrs.end(), new Node);
+                    //prev.back()->type = Node::KEY;
+                    
+                    for (size_t j = index; j < init->vals.size(); j++) {
+                        prev.back()->ptrs.back()->vals.push_back(init->vals[j]);
+                    }
+                    for (size_t j = index; j < init->vals.size(); j++) {
+                        init->vals.pop_back();
                     }
                 }
             } else {
@@ -246,7 +283,7 @@ void BPlusTree<T>::insert(const T &val) {
 
 template<typename T>
 void BPlusTree<T>::remove(const T &val) {
-    cout << "Removing " << val << endl;
+    assert(NOT_IMPLEMENTED);
 }
 
 template<typename T>
