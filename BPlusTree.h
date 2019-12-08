@@ -322,6 +322,11 @@ void BPlusTree<T>::insert(const T &val) {
                         // the index is index + 1, ptrs has 1 when created and pointer right is greater than equal to val
                         prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node<T>);
                         
+                        // link the next node
+                        prev.back()->ptrs[i+1]->ptrs = current->ptrs;
+                        if (!current->ptrs.empty()) current->ptrs.pop_back();
+                        current->ptrs.push_back(prev.back()->ptrs[i+1]);
+
                         // move the value at index and beyond to the new node's values
                         for (size_t j = index; j < current->vals.size(); j++) {
                             prev.back()->ptrs[i+1]->vals.push_back(current->vals[j]);
@@ -341,6 +346,11 @@ void BPlusTree<T>::insert(const T &val) {
                     // insert the number at the
                     prev.back()->vals.push_back(num);
                     prev.back()->ptrs.push_back(new Node<T>);
+
+                    // link the next node
+                    prev.back()->ptrs.back()->ptrs = current->ptrs;
+                    if (!current->ptrs.empty()) current->ptrs.pop_back();
+                    current->ptrs.push_back(prev.back()->ptrs.back());
 
                     // move the value at index and beyond to the new node's values
                     for (size_t j = index; j < current->vals.size(); j++) {
