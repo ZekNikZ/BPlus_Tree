@@ -316,7 +316,7 @@ void BPlusTreeRenderer<T>::draw(SDL_Plotter & g, const BPlusTree<T> & tree, int 
             if (thisNode->node->ptrs.size() == 1) {
                 Arrow::drawArrow(g, xDraw - MIN_SPACE_BETWEEN_NODES,
                                  yDraw + rowHeight / 2, xDraw,
-                                 yDraw + rowHeight / 2);
+                                 yDraw + rowHeight / 2, 2);
             }
         }
     }
@@ -346,7 +346,7 @@ void BPlusTreeRenderer<T>::draw(SDL_Plotter & g, const BPlusTree<T> & tree, int 
             for (int i = 0; i < rendNode->children.size(); ++i) {
                 Arrow::drawArrow(g, rendNode->valXs[i], yDraw + rowHeight,
                                  rendNode->children[i]->x,
-                                 yDraw + LEVEL_SEPARATION + rowHeight);
+                                 yDraw + LEVEL_SEPARATION + rowHeight, 2);
             }
         }
     }

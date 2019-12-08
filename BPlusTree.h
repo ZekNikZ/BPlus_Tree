@@ -5,6 +5,7 @@
 #include <ostream>
 #include <cassert>
 #include <stack>
+#include <algorithm>
 
 using namespace std;
 
@@ -28,12 +29,12 @@ class BPlusTree {
     template<typename R>
     friend class BPlusTreeRenderer;
 private:
+    void insertRecursive(Node<T>* node, const T& val);  // insert into tree
+    void fixChild(Node<T>* parent, Node<T>* child);
+
     size_t M;    // order of table
     size_t L;    // amount of data in data nodes
     Node<T> * root;  // root
-    //TODO: Is the the amount of data stored at the bottom in the data nodes,
-    // or for all nodes?
-    // ^ Amount of Data ^
     size_t size; // current amount of data stored
 
 public:
@@ -194,182 +195,77 @@ BPlusTree<T>& BPlusTree<T>::operator=(BPlusTree &&other) {
     }
 }
 
-//TODO: change prev to a stack
+template<typename T>
+void BPlusTree<T>::insertRecursive(Node<T> *node, const T &val) {
+    if (node->getType() == Node<T>::KEY) {
+        int i = 0;
+        while (i < node->vals.size() && val >= node->vals[i])
+            ++i;
+        Node<T>* child = node->ptrs[i];
+        // Insert value to child
+        insertRecursive(node->ptrs[i], val);
+        fixChild(node, child);
+    }
+    else {
+        auto placeToInsert = upper_bound(node->vals.begin(), node->vals.end(), val);
+        node->vals.insert(placeToInsert, val);
+    }
+}
+
+template<typename T>
+void BPlusTree<T>::fixChild(Node<T>* parent, Node<T>* child) {
+
+    if ((child->type == Node<T>::DATA && child->vals.size() > L)
+        || (child->type == Node<T>::KEY && child->ptrs.size() > M))
+    {
+        if (child == root) {
+            parent = new Node<T>(Node<T>::KEY);
+            parent->ptrs.push_back(child);
+            this->root = parent;
+        }
+
+        Node<T>* newNode = new Node<T>(child->getType());
+
+        // move vals (median to end) to new node
+        int medianIndex = child->vals.size()/ 2;
+        if (child->type == Node<T>::DATA) {
+            for (int i = medianIndex; i < child->vals.size(); ++i)
+                newNode->vals.push_back(child->vals[i]);
+            parent->ptrs.push_back(newNode);
+            parent->vals.push_back(newNode->vals[0]);
+            child->vals.resize(medianIndex);
+            Node<T>* oldNextData = child->ptrs[0];
+            child->ptrs[0] = newNode;
+            newNode->ptrs.push_back(oldNextData);
+        }
+        else {
+            // Don't copy the median to the new node, only to parent
+            for (int i = medianIndex + 1; i < child->vals.size(); ++i) {
+                newNode->vals.push_back(child->vals[i]);
+            }
+            for (int i = medianIndex + 1; i < child->ptrs.size(); ++i) {
+                newNode->ptrs.push_back(child->ptrs[i]);
+            }
+
+            parent->ptrs.push_back(newNode);
+            parent->vals.push_back(child->vals[medianIndex]);
+            child->vals.resize(medianIndex);
+            child->ptrs.resize(medianIndex + 1);
+        }
+    }
+}
+
 template<typename T>
 void BPlusTree<T>::insert(const T &val) {
-    bool insert = false;
-    // check if there is an exisiting tree of not
     if (root == nullptr){
-        //if tree does not extist create a new data node with val
+        //if tree does not exist create a new data node with val
         root = new Node<T>;
         root->vals.push_back(val);
-    } else {
-        // if a tree does exist
-        Node<T>* current = root;
-        vector<Node<T>*> prev;
-        prev.push_back(current);
-        while (current->getType() == Node<T>::KEY){
-            
-            for (int i = 0; i < current->vals.size(); i++) {
-                if (val < current->vals[i]){
-                    current = current->ptrs[i];
-                    break;
-                }
-            }
-            if (current == prev.back()){
-                current = current->ptrs[current->vals.size()];
-            }
-            prev.push_back(current);
-        }
-        for (int i = 0; i < current->vals.size() && !insert; i++) {
-            if (val < current->vals[i]){
-                current->vals.insert(current->vals.begin() + i, val);
-                insert = true;
-            }
-        }
-        if (!insert){
-            current->vals.push_back(val);
-        }
-        // this part is buggy... very buggy...
-        bool fixed = false;
-        while(!prev.empty()){
-            
-            if (prev.back()->ptrs.size() > M){
-                size_t index = M / 2;
-                // get the value of the num pushed to a key
-                T num = prev.back()->vals[index];
-                // save the initial value of pointer and of the last visited
-                Node<T>* initBack = prev.back();
-                // if the node that need to be fixed is the root create a
-                // new root KEY node that points to current data and add it to previous
-                if (root == prev.back()){
-                    root = new Node<T>(Node<T>::KEY);
-                    root->ptrs.push_back(prev.back());
-                    prev.insert(prev.begin(), root);
-                }
-                // to work with the node before the last node we touched
-                prev.pop_back();
-                // find the position to insert
-                for (int i = 0; i < prev.back()->vals.size(); i++) {
-                    // if the value at index is greater than num then the index is found
-                    if (prev.back()->vals[i] >= num){
-                        // move the num into the previous's values at index
-                        prev.back()->vals.insert(prev.back()->vals.begin() + i, num);
-                        // make a new KEY node in previous' pointrs at index
-                        prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node<T>(Node<T>::KEY));
-                        
-                        // move the value at index and beyond to the new node's values
-                        for (size_t j = index + 1; j < initBack->vals.size(); j++) {
-                            prev.back()->ptrs[i+1]->vals.push_back(initBack->vals[j]);
-                        }
-                        // pop the values from initBack for vals.size-index
-                        for (size_t j = index; j <= initBack->vals.size(); j++) {
-                            initBack->vals.pop_back();
-                        }
-                        // move the pointers at index and beyond to the new node's pointers
-                        for ( size_t j = index + 1; j < initBack->ptrs.size(); j++){
-                            prev.back()->ptrs[i+1]->ptrs.push_back(initBack->ptrs[j]);
-                        }
-                        // pop the pointers from initial back for ptrs.size-index
-                        for (size_t j = index; j <= initBack->ptrs.size(); j++) {
-                            initBack->ptrs.pop_back();
-                        }
-                        // a flag to show that the node has been fixed and values are set
-                        fixed = true;
-                        break;
-                    }
-                }
-                if (!fixed){
-                    // move the num into the previous's values at index
-                    prev.back()->vals.insert(prev.back()->vals.end(), num);
-                    
-                    prev.back()->ptrs.insert(prev.back()->ptrs.end(), new Node<T>(Node<T>::KEY));
-                    
-                    // move the value at index and beyond to the new node's values
-                    for (size_t j = index + 1; j < initBack->vals.size(); j++) {
-                        prev.back()->ptrs.back()->vals.push_back(initBack->vals[j]);
-                    }
-                    // pop the values from initBack for vals.size-index
-                    for (size_t j = index; j <= initBack->vals.size(); j++) {
-                        initBack->vals.pop_back();
-                    }
-                    // move the pointers at index and beyond to the new node's pointers
-                    for ( size_t j = index + 1; j < initBack->ptrs.size(); j++){
-                        prev.back()->ptrs.back()->ptrs.push_back(initBack->ptrs[j]);
-                    }
-                    // pop the pointers from initial back for ptrs.size-index
-                    for (size_t j = index; j <= initBack->ptrs.size(); j++) {
-                        initBack->ptrs.pop_back();
-                    }
-                }
-            } else if (prev.back()->vals.size() > L){
-                size_t index = L / 2 + 1;
-                // get the value of the num pushed to a key
-                T num = current->vals[index];
-                // if the node that need to be fixed is the root create a
-                // new root KEY node that points to current data and add it to previous
-                if (root == prev.back()){
-                    root = new Node<T>(Node<T>::KEY);
-                    root->ptrs.push_back(prev.back());
-                    prev.insert(prev.begin(), root);
-                }
-                // to work with the node before the last node we touched
-                prev.pop_back();
-                // find the position to insert
-                for (int i = 0; i < prev.back()->vals.size(); i++) {
-                    // if the previous node data is greater than number we found index
-                    if (prev.back()->vals[i] >= num){
-                        // move the num into the previous node's values at index
-                        prev.back()->vals.insert(prev.back()->vals.begin() + i, num);
-                        // create a new pointer to a node into the previous node's pointers at index
-                        // the index is index + 1, ptrs has 1 when created and pointer right is greater than equal to val
-                        prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node<T>);
-                        
-                        // link the next node
-                        prev.back()->ptrs[i+1]->ptrs = current->ptrs;
-                        if (!current->ptrs.empty()) current->ptrs.pop_back();
-                        current->ptrs.push_back(prev.back()->ptrs[i+1]);
-
-                        // move the value at index and beyond to the new node's values
-                        for (size_t j = index; j < current->vals.size(); j++) {
-                            prev.back()->ptrs[i+1]->vals.push_back(current->vals[j]);
-                        }
-                        // pop the values from current for vals.size-index
-                        for (size_t j = index; j <= current->vals.size(); j++) {
-                            current->vals.pop_back();
-                        }
-                        // the node has been fixed
-                        fixed = true;
-                        break;
-                    }
-                }
-                // if the item needs to be inserted after the last element then
-                // it would not have been fixed eariler and will be inserted at the back now
-                if (!fixed){
-                    // insert the number at the
-                    prev.back()->vals.push_back(num);
-                    prev.back()->ptrs.push_back(new Node<T>);
-
-                    // link the next node
-                    prev.back()->ptrs.back()->ptrs = current->ptrs;
-                    if (!current->ptrs.empty()) current->ptrs.pop_back();
-                    current->ptrs.push_back(prev.back()->ptrs.back());
-
-                    // move the value at index and beyond to the new node's values
-                    for (size_t j = index; j < current->vals.size(); j++) {
-                        prev.back()->ptrs.back()->vals.push_back(current->vals[j]);
-                    }
-                    // pop the values from current for vals.size-index
-                    for (size_t j = index; j <= current->vals.size(); j++) {
-                        current->vals.pop_back();
-                    }
-                }
-            } else {
-                // if this level has nothing that needs to be fixed pop and check the next
-                prev.pop_back();
-            }
-            fixed = false;
-        }
+        root->ptrs.push_back(nullptr);
+    }
+    else {
+        insertRecursive(root, val);
+        fixChild(nullptr, root);
     }
     size++;
 }
