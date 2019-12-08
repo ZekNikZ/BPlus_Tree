@@ -194,7 +194,6 @@ BPlusTree<T>& BPlusTree<T>::operator=(BPlusTree &&other) {
     }
 }
 
-//TODO: change prev to a stack
 template<typename T>
 void BPlusTree<T>::insert(const T &val) {
     bool insert = false;
@@ -445,17 +444,16 @@ bool BPlusTree<T>::contains(const T &val) const {
     Node<T>* current = root;
     bool found = false;
     while (current->getType() == Node<T>::KEY){
-        current = current->ptrs.back();
-        for (int i = 0; i < current->vals.size(); i++) {
-            if (val < current->vals[i]){
-                current = current->ptrs[i];
-                break;
-            }
+        int i = 0;
+        while (i < current->vals.size() && val >= current->vals[i]) {
+            if (val == current->vals[i])
+                return true;
+            ++i;
         }
+        current = current->ptrs[i];
     }
     for (int i = 0; i < current->vals.size() && !found; i++) {
         if (val == current->vals[i]){
-            current->vals.insert(current->vals.begin() + i, val);
             found = true;
         }
     }
@@ -473,16 +471,15 @@ ostream &operator<<(ostream &out, const BPlusTree<Key> &tree) {
     while (ptr->getType() == Node<Key>::KEY){
         ptr = ptr->ptrs.front();
     }
-    int index;
-    for (int i = 0; i < tree.size(); ++i){
-        index = 0;
-        cout << ptr->vals[index] << " ";
-        if (index >= ptr->vals.size()){
+    while (ptr) {
+        for (int i = 0; i < ptr->vals.size(); ++i)
+            out << ptr->vals[i] << " ";
+        if (ptr->ptrs.empty())
+            ptr = nullptr;
+        else
             ptr = ptr->ptrs[0];
-            index = 0;
-        }
-        index++;
     }
+    return out;
 }
 
 template <class T>
