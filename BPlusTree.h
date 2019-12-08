@@ -63,6 +63,7 @@ public:
     void setMAndClear(int m) {
         makeEmpty();
         this->M = m;
+        this->L = m - 1;
     }
     void setLAndClear(int l) {
         makeEmpty();
@@ -75,6 +76,8 @@ public:
     size_t getL() const;
     // does the tree contain val?
     bool contains(const T & val) const;
+    
+    Node<T>* findPos(const T &val) const;
     // is the tree empty? (root==nullptr)
     bool isEmpty() const;
 
@@ -374,6 +377,22 @@ void BPlusTree<T>::insert(const T &val) {
 template<typename T>
 void BPlusTree<T>::remove(const T &val) {
     assert(NOT_IMPLEMENTED);
+    Node<T>* current = root;
+    
+    while (current->getType() == Node<T>::KEY){
+        for (int i = 0; i < current->vals.size(); i++) {
+            current = current->ptrs[current->ptrs.size()];
+            if (val < current->vals[i]){
+                current = current->ptrs[i];
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < current->vals.size(); i++) {
+        if (val == current->vals[i]){
+            current->vals.insert(current->vals.begin() + i, val);
+        }
+    }
 }
 
 template<typename T>
@@ -392,6 +411,7 @@ void BPlusTree<T>::makeEmpty() {
             delete node;
         }
         root = nullptr;
+        size = 0;
     }
 }
 
@@ -404,9 +424,42 @@ template<typename T>
 size_t BPlusTree<T>::getL() const {
     return L;
 }
+
+template<typename T>
+Node<T>* BPlusTree<T>::findPos(const T &val) const {
+    Node<T>* current = root;
+    while (current->getType() == Node<T>::KEY){
+        for (int i = 0; i < current->vals.size(); i++) {
+            current = current->ptrs[current->ptrs.size()];
+            if (val < current->vals[i]){
+                current = current->ptrs[i];
+                break;
+            }
+        }
+    }
+    return current;
+}
+
 template<typename T>
 bool BPlusTree<T>::contains(const T &val) const {
-    assert(NOT_IMPLEMENTED);
+    Node<T>* current = root;
+    bool found = false;
+    while (current->getType() == Node<T>::KEY){
+        current = current->ptrs.back();
+        for (int i = 0; i < current->vals.size(); i++) {
+            if (val < current->vals[i]){
+                current = current->ptrs[i];
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < current->vals.size() && !found; i++) {
+        if (val == current->vals[i]){
+            current->vals.insert(current->vals.begin() + i, val);
+            found = true;
+        }
+    }
+    return found;
 }
 
 template<typename T>
@@ -416,7 +469,20 @@ bool BPlusTree<T>::isEmpty() const {
 
 template<class Key>
 ostream &operator<<(ostream &out, const BPlusTree<Key> &tree) {
-    assert(NOT_IMPLEMENTED);
+    Node<Key>* ptr = tree.root;
+    while (ptr->getType() == Node<Key>::KEY){
+        ptr = ptr->ptrs.front();
+    }
+    int index;
+    for (int i = 0; i < tree.size(); ++i){
+        index = 0;
+        cout << ptr->vals[index] << " ";
+        if (index >= ptr->vals.size()){
+            ptr = ptr->ptrs[0];
+            index = 0;
+        }
+        index++;
+    }
 }
 
 template <class T>
