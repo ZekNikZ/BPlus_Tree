@@ -27,12 +27,7 @@ template<typename T>
 class BPlusTree {
     template<typename R>
     friend class BPlusTreeRenderer;
-    template<typename R>
-    friend void handleInput(BPlusTree<R>& tree, const string& input);
-
 private:
-
-
     size_t M;    // order of table
     size_t L;    // amount of data in data nodes
     Node<T> * root;  // root
@@ -65,6 +60,14 @@ public:
     void insert(const T & val);  // insert into tree
     void remove(const T & val);  // remove from tree
     void makeEmpty();            // make the tree empty
+    void setMAndClear(int m) {
+        makeEmpty();
+        this->M = m;
+    }
+    void setLAndClear(int l) {
+        makeEmpty();
+        this->L = l;
+    }
 
 // Getters
     // get M
@@ -97,6 +100,8 @@ BPlusTree<T>::BPlusTree(size_t M, size_t L)
 
 template<typename T>
 BPlusTree<T>::~BPlusTree() {
+    if (!root)
+        return;
     stack<Node<T>*> toDelete;
     toDelete.push(root);
     while (!toDelete.empty()) {

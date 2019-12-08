@@ -9,17 +9,17 @@
 using namespace std;
 
 template <class T>
-void handleInput(BPlusTree<T>& tree, const string& input);
+bool handleInput(BPlusTree<T>& tree, const string& input);
 
 int main(int argc, char* argv[]) {
-    static const int TARGET_FPS = 60;
+    static const int TARGET_FPS = 30;
     static const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
     static const int TREE_MOVE_SPEED = 8;
 
     SDL_Plotter plotter(720, 960);
     BPlusTreeRenderer<int> renderer;
 
-    BPlusTree<int> tree = BPlusTree<int>::makeTestTree();
+    BPlusTree<int> tree;
     int treeX = 0;
     int treeY = 0;
 
@@ -29,7 +29,8 @@ int main(int argc, char* argv[]) {
 
     BitmapImage cheesyChristmasBackground("images/christmasBg.bmp");
 
-    while (!plotter.getQuit()) {
+    bool quitCommand = false;
+    while (!plotter.getQuit() && !quitCommand) {
         auto startTime = chrono::system_clock::now();
         // Poll for events
         if (plotter.kbhit()) {
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]) {
             // Handle input
             char key = plotter.getKey();
             if (key == SDL_SCANCODE_RETURN) {
-                handleInput(tree, input);
+                quitCommand = handleInput(tree, input);
                 input.clear();
             }
             else if (key == DOWN_ARROW) {
@@ -64,9 +65,9 @@ int main(int argc, char* argv[]) {
         plotter.clear();
         cheesyChristmasBackground.draw(plotter, 0, 0);
         renderer.draw(plotter, tree, treeX, treeY);
-        inputFont.draw(plotter, 10, plotter.getRow() - inputFont.getHeight(), input);
+        inputFont.draw(plotter, 10, plotter.getRow() - 35 - inputFont.getHeight(), input);
         ostringstream info;
-        info << "M " << tree.getM() << "   L " << tree.getL() << "         INSERT  REMOVE  MAKE EMPTY  SETM  SETL  SETML";
+        info << "M " << tree.getM() << "   L " << tree.getL() << "         INSERT  REMOVE  MAKE EMPTY  SET M  SET L";
         infoFont.draw(plotter,10, plotter.getRow() - 30, info.str());
         plotter.update();
 
@@ -89,29 +90,49 @@ T parseArg(const string& arg) {
 }
 
 template <class T>
-void handleInput(BPlusTree<T>& tree, const string& input) {
-    istringstream ss(input);
-    string command, arg;
-    ss >> command >> arg;
-
-    if (command == "INSERT" || command == "I") {
-        tree.insert(parseArg<T>(arg));
-    } else if (command == "REMOVE" || command == "R") {
-        tree.remove(parseArg<T>(arg));
-    } else if ((command == "MAKE" && arg == "EMPTY") || (command == "M" && arg == "E") || command == "CLEAR") {
-        tree.makeEmpty();
-    } else if (command == "SETM" || command == "M") { // TODO: ensure M>2
-        tree.makeEmpty();
-        tree.M = parseArg<int>(arg);
-        tree.L = tree.M - 1;
-    } else if (command == "SETL" || command == "L") { // TODO: ensure L > 1
-        tree.makeEmpty();
-        tree.L = parseArg<int>(arg);
-    } else if (command == "SETML" || command == "ML") { // TODO: ensure M>2 ensure L > 1
-        tree.makeEmpty();
-        tree.M = parseArg<int>(arg);
-        ss >> tree.L;
-    } else if (command == "QUIT" || command == "Q") {
-        exit(0);
+void setM(BPlusTree<T>& tree, const string& m) {
+    int intM = parseArg<T>(m);
+    if (intM > 2) {
+        tree.setMAndClear(intM);
     }
+}
+
+template <class T>
+void setL(BPlusTree<T>& tree, const string& l) {
+    int intL = parseArg<T>(l);
+    if (intL > 1) {
+        tree.setLAndClear(intL);
+    }
+}
+
+template <class T>
+bool handleInput(BPlusTree<T>& tree, const string& input) {
+    istringstream ss(input);
+    string command;
+    vector<string> args;
+    ss >> command;
+    string arg;
+    while (ss >> arg) {
+        args.push_back(arg);
+    }
+
+    if ((command == "INSERT" || command == "I") && args.size() == 1) {
+        tree.insert(parseArg<T>(args[0]));
+    }
+    else if ((command == "REMOVE" || command == "R") && args.size() == 1) {
+        tree.remove(parseArg<T>(args[0]));
+    }
+    else if ((command == "MAKE" && args.size() == 1 && args[0] == "EMPTY")
+        || (command == "ME") || command == "CLEAR") {
+        tree.makeEmpty();
+    }
+    else if (command == "SET" && args.size() == 2) {
+        if (args[0] == "M") {
+            setM(tree, args[1]);
+        }
+        else if (args[0] == "L") {
+            setL(tree, args[1]);
+        }
+    }
+    return (command == "QUIT" || command == "Q");
 }
