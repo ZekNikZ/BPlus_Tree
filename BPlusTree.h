@@ -118,22 +118,77 @@ BPlusTree<T>::~BPlusTree() {
 
 template<typename T>
 BPlusTree<T>::BPlusTree(const BPlusTree &other) {
-    assert(NOT_IMPLEMENTED);
+    M = other.M;
+    L = other.L;
+    root = nullptr;
+    size = other.size;
+    //if the other tree contains data, copy it.
+    if(!other.isEmpty()) {
+        //establish a pointer to the other root
+        Node<T> *adder = other.root;
+        //move the pointer down to the leaf (aka DATA) level for inserts
+        while (adder->type != Node<T>::DATA)
+            adder = adder->ptrs[0];
+        while(adder){
+            //add all the values in the current data node
+            for(auto k = adder->vals.begin(); k != adder->vals.end(); k++)
+                insert(*k);
+            //move to next data node. If it's null, we're done.
+            adder = adder->ptrs[0];
+        }
+    }
+
 }
 
 template<typename T>
 BPlusTree<T>::BPlusTree(BPlusTree &&other) {
-    assert(NOT_IMPLEMENTED);
+    M = other.M;
+    L = other.L;
+    root = other.root;
+    size = other.size;
 }
 
 template<typename T>
 BPlusTree<T>& BPlusTree<T>::operator=(const BPlusTree &other) {
-    assert(NOT_IMPLEMENTED);
+    //only carry out if the other tree isn't this one
+    if(this->root != other.root){
+        //clear our tree
+        if(!this->isEmpty())
+            this->makeEmpty();
+        M = other.M;
+        L = other.L;
+        size = other.size;
+        //if the other tree contains data, copy it.
+        if(!other.isEmpty()) {
+            //establish a pointer to the other root
+            Node<T> *adder = other.root;
+            //move the pointer down to the leaf (aka DATA) level for inserts
+            while (adder->type != Node<T>::DATA)
+                adder = adder->ptrs[0];
+            while(adder){
+                //add all the values in the current data node
+                for(auto k = adder->vals.begin(); k != adder->vals.end(); k++)
+                    insert(*k);
+                //move to next data node. If it's null, we're done.
+                adder = adder->ptrs[0];
+            }
+        }
+    }
+
+    return *this;
 }
 
 template<typename T>
 BPlusTree<T>& BPlusTree<T>::operator=(BPlusTree &&other) {
-    assert(NOT_IMPLEMENTED);
+    //only carry out if the other tree isn't this one
+    if(this->root != other.root){
+        if(!this->isEmpty())
+            this->makeEmpty();
+        M = other.M;
+        L = other.L;
+        root = other.root;
+        size = other.size;
+    }
 }
 
 //TODO: change prev to a stack
