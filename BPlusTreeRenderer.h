@@ -243,7 +243,8 @@ void BPlusTreeRenderer<T>::draw(SDL_Plotter & g, const BPlusTree<T> & tree, int 
     static const int CHAR_HEIGHT = characters.getHeight();
 
     // Color constants
-    static const Color ARROW_COLOR(120, 120, 120);
+    static const int ARROW_COLOR_NUM = 170;
+    static const Color ARROW_COLOR(ARROW_COLOR_NUM, ARROW_COLOR_NUM, ARROW_COLOR_NUM);
 
     // If there is no tree to draw, stop here
     if (tree.size == 0 || tree.root == nullptr) return;

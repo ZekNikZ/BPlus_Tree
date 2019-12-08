@@ -34,9 +34,11 @@ void Arrow::drawLine(SDL_Plotter &g, int fromX, int fromY, int toX, int toY, int
 		&& (int)curX + thickness < g.getCol()
 		&& (int)curY >= -thickness
 		&& (int)curY + thickness < g.getRow();
-	for (int i = 0; i < numSamples && inBounds; ++i) {
-		Rectangle rect{(int)curX, (int)curY, thickness, thickness, 0, Color::BLACK(), true, c};
-		rect.draw(g);
+	for (int i = 0; i < numSamples; ++i) {
+	    if (inBounds) {
+            Rectangle rect{(int)curX, (int)curY, thickness, thickness, 0, Color::BLACK(), true, c};
+            rect.draw(g);
+	    }
 		curX += dX;
 		curY += dY;
 		inBounds = (int)curX >= -thickness

@@ -14,7 +14,7 @@ bool handleInput(BPlusTree<T>& tree, const string& input);
 int main(int argc, char* argv[]) {
     static const int TARGET_FPS = 30;
     static const int TARGET_FRAME_MILLISECONDS = 1000 / TARGET_FPS;
-    static const int TREE_MOVE_SPEED = 8;
+    static const int TREE_MOVE_SPEED = 15;
 
     SDL_Plotter plotter(720, 960);
     BPlusTreeRenderer<int> renderer;
