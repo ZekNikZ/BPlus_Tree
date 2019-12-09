@@ -171,20 +171,7 @@ BPlusTree<T>::BPlusTree(size_t M, size_t L)
 
 template<typename T>
 BPlusTree<T>::~BPlusTree() {
-    if (!root)
-        return;
-    stack<Node<T>*> toDelete;
-    toDelete.push(root);
-    while (!toDelete.empty()) {
-        Node<T>* node = toDelete.top();
-        toDelete.pop();
-        if (node->getType() == Node<T>::KEY) {
-            for (Node<T>* n : node->getPointers()) {
-                toDelete.push(n);
-            }
-        }
-        delete node;
-    }
+    makeEmpty();
 }
 
 template<typename T>
@@ -192,7 +179,7 @@ BPlusTree<T>::BPlusTree(const BPlusTree &other) {
     M = other.M;
     L = other.L;
     root = nullptr;
-    size = other.size;
+    size = 0; // changed when inserting
     //if the other tree contains data, copy it.
     if(!other.isEmpty()) {
         //establish a pointer to the other root
@@ -217,6 +204,7 @@ BPlusTree<T>::BPlusTree(BPlusTree &&other) {
     L = other.L;
     root = other.root;
     size = other.size;
+    other.root = nullptr; // no double free
 }
 
 template<typename T>
@@ -228,7 +216,7 @@ BPlusTree<T>& BPlusTree<T>::operator=(const BPlusTree &other) {
             this->makeEmpty();
         M = other.M;
         L = other.L;
-        size = other.size;
+        size = 0; // changed on inserts
         //if the other tree contains data, copy it.
         if(!other.isEmpty()) {
             //establish a pointer to the other root
@@ -259,6 +247,7 @@ BPlusTree<T>& BPlusTree<T>::operator=(BPlusTree &&other) {
         L = other.L;
         root = other.root;
         size = other.size;
+        other.root = nullptr;
     }
 }
 
