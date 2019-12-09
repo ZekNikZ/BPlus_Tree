@@ -5,6 +5,7 @@
 #include <ostream>
 #include <cassert>
 #include <stack>
+#include <algorithm>
 
 using namespace std;
 
@@ -254,23 +255,25 @@ void BPlusTree<T>::insert(const T &val) {
                     if (prev.back()->vals[i] >= num){
                         // move the num into the previous's values at index
                         prev.back()->vals.insert(prev.back()->vals.begin() + i, num);
-                        // make a new KEY node in previous' pointrs at index
+                        // make a new KEY node in previous' pointers at index
                         prev.back()->ptrs.insert(prev.back()->ptrs.begin() + (i + 1), new Node<T>(Node<T>::KEY));
 
                         // move the value at index and beyond to the new node's values
-                        for (size_t j = index + 1; j < initBack->vals.size(); j++) {
+                        size_t ibvSize = initBack->vals.size();
+                        for (size_t j = index + 1; j < ibvSize; j++) {
                             prev.back()->ptrs[i+1]->vals.push_back(initBack->vals[j]);
                         }
                         // pop the values from initBack for vals.size-index
-                        for (size_t j = index; j <= initBack->vals.size(); j++) {
+                        for (size_t j = index + 1; j <= ibvSize; j++) {
                             initBack->vals.pop_back();
                         }
                         // move the pointers at index and beyond to the new node's pointers
-                        for ( size_t j = index + 1; j < initBack->ptrs.size(); j++){
+                        size_t ibpSize = initBack->ptrs.size();
+                        for ( size_t j = index + 1; j < ibpSize; j++){
                             prev.back()->ptrs[i+1]->ptrs.push_back(initBack->ptrs[j]);
                         }
                         // pop the pointers from initial back for ptrs.size-index
-                        for (size_t j = index; j <= initBack->ptrs.size(); j++) {
+                        for (size_t j = index + 1; j < ibpSize; j++) {
                             initBack->ptrs.pop_back();
                         }
                         // a flag to show that the node has been fixed and values are set
@@ -285,19 +288,21 @@ void BPlusTree<T>::insert(const T &val) {
                     prev.back()->ptrs.insert(prev.back()->ptrs.end(), new Node<T>(Node<T>::KEY));
 
                     // move the value at index and beyond to the new node's values
-                    for (size_t j = index + 1; j < initBack->vals.size(); j++) {
+                    size_t ibvSize = initBack->vals.size();
+                    for (size_t j = index + 1; j < ibvSize; j++) {
                         prev.back()->ptrs.back()->vals.push_back(initBack->vals[j]);
                     }
                     // pop the values from initBack for vals.size-index
-                    for (size_t j = index; j <= initBack->vals.size(); j++) {
+                    for (size_t j = index + 1; j <= ibvSize; j++) {
                         initBack->vals.pop_back();
                     }
                     // move the pointers at index and beyond to the new node's pointers
-                    for ( size_t j = index + 1; j < initBack->ptrs.size(); j++){
+                    size_t ibpSize = initBack->ptrs.size();
+                    for ( size_t j = index + 1; j < ibpSize; j++){
                         prev.back()->ptrs.back()->ptrs.push_back(initBack->ptrs[j]);
                     }
                     // pop the pointers from initial back for ptrs.size-index
-                    for (size_t j = index; j <= initBack->ptrs.size(); j++) {
+                    for (size_t j = index + 1; j < ibpSize; j++) {
                         initBack->ptrs.pop_back();
                     }
                 }
@@ -330,11 +335,12 @@ void BPlusTree<T>::insert(const T &val) {
                         current->ptrs.push_back(prev.back()->ptrs[i+1]);
 
                         // move the value at index and beyond to the new node's values
-                        for (size_t j = index; j < current->vals.size(); j++) {
+                        size_t cvSize = current->vals.size();
+                        for (size_t j = index; j < cvSize; j++) {
                             prev.back()->ptrs[i+1]->vals.push_back(current->vals[j]);
                         }
                         // pop the values from current for vals.size-index
-                        for (size_t j = index; j <= current->vals.size(); j++) {
+                        for (size_t j = index; j < cvSize; j++) {
                             current->vals.pop_back();
                         }
                         // the node has been fixed
@@ -355,11 +361,12 @@ void BPlusTree<T>::insert(const T &val) {
                     current->ptrs.push_back(prev.back()->ptrs.back());
 
                     // move the value at index and beyond to the new node's values
-                    for (size_t j = index; j < current->vals.size(); j++) {
+                    size_t cvSize = current->vals.size();
+                    for (size_t j = index; j < cvSize; j++) {
                         prev.back()->ptrs.back()->vals.push_back(current->vals[j]);
                     }
                     // pop the values from current for vals.size-index
-                    for (size_t j = index; j <= current->vals.size(); j++) {
+                    for (size_t j = index; j < cvSize; j++) {
                         current->vals.pop_back();
                     }
                 }
@@ -375,22 +382,151 @@ void BPlusTree<T>::insert(const T &val) {
 
 template<typename T>
 void BPlusTree<T>::remove(const T &val) {
-    assert(NOT_IMPLEMENTED);
-    Node<T>* current = root;
+    // Ensure that there is data in the tree
+    if (root == nullptr) {
+        return;
+    }
 
-    while (current->getType() == Node<T>::KEY){
-        for (int i = 0; i < current->vals.size(); i++) {
-            current = current->ptrs[current->ptrs.size()];
-            if (val < current->vals[i]){
-                current = current->ptrs[i];
+    // Navigate to the data node where the value is
+    vector<Node<T> *> visitedNodes;
+    Node<T> * ptr = root;
+    int childIndex = 0;
+    while (ptr->type == Node<T>::KEY) {
+        size_t i = 0;
+        for (; i < ptr->vals.size(); ++i) {
+            if (val < ptr->vals[i]) {
                 break;
             }
         }
+        visitedNodes.push_back(ptr);
+        ptr = ptr->ptrs[i];
+        childIndex = i;
     }
-    for (int i = 0; i < current->vals.size(); i++) {
-        if (val == current->vals[i]){
-            current->vals.insert(current->vals.begin() + i, val);
+
+    // Ensure the data is in the tree
+    if (find(ptr->vals.begin(), ptr->vals.end(), val) == ptr->vals.end()) {
+        return;
+    }
+
+    // Remove the value
+    bool updateParent = false;
+    if (ptr->vals[0] == val) {
+        updateParent = true;
+    }
+    ptr->vals.erase(find(ptr->vals.begin(), ptr->vals.end(), val));
+
+    // Check if we need to steal data from another data node
+    bool updateRight = false, collapse = false;
+    Node<T> * leftSiblingsParent = nullptr;
+    T oldRightFront;
+    if (ptr->vals.size() < L / 2) {
+        // Check if right sibling has excess data
+        if (!ptr->ptrs.empty() && ptr->ptrs.front()->vals.size() > L/2) {
+            updateRight = true;
+            oldRightFront = ptr->ptrs.front()->vals.front();
+            ptr->vals.push_back(oldRightFront);
+            ptr->ptrs.front()->vals.erase(ptr->ptrs.front()->vals.begin());
+            cout << "steal from right" << endl;
+        } else {
+            // Navigate to the left sibling
+            Node<T> * leftSibling = nullptr;
+            if (childIndex > 0) {
+                leftSibling = visitedNodes.back()->ptrs[childIndex - 1];
+            } else {
+                auto leftPtr = ++visitedNodes.rbegin();
+                if (leftPtr != visitedNodes.rend()) {
+                    auto leftPtrIndex = find((*leftPtr)->ptrs.begin(), (*leftPtr)->ptrs.end(), *(leftPtr - 1));
+                    while (leftPtrIndex == (*leftPtr)->ptrs.begin()) {
+                        ++leftPtr;
+                        if (leftPtr == visitedNodes.rend()) break;
+                        leftPtrIndex = find((*leftPtr)->ptrs.begin(), (*leftPtr)->ptrs.end(), *(leftPtr - 1));
+                    }
+                    if (leftPtr != visitedNodes.rend()) {
+                        leftSibling = *leftPtr;
+                        leftSibling = leftSibling->ptrs.front();
+                        while (leftSibling->type != Node<T>::DATA) {
+                            leftSiblingsParent = leftSibling;
+                            leftSibling = leftSibling->ptrs.back();
+                        }
+                    }
+                }
+            }
+
+            // Check if left sibling has excess data
+            cout << "leftSibling: " << leftSibling->vals.front() << endl;
+            if (leftSibling && leftSibling->vals.size() > L / 2) {
+                ptr->vals.insert(ptr->vals.begin(), leftSibling->vals.back());
+                leftSibling->vals.pop_back();
+                updateParent = true;
+                cout << "steal from left" << endl;
+            }
+            // Otherwise, collapse
+            else {
+                collapse = true;
+                cout << "collapse" << endl;
+            }
         }
+    }
+
+    // Collapse and/or fix parents
+    if (!collapse) {
+        // Check if we need to update the parent
+        if (updateParent) {
+            auto parentPtr = visitedNodes.rbegin();
+            for (size_t i = 1; i < (*parentPtr)->ptrs.size(); ++i) {
+                (*parentPtr)->vals[i - 1] = (*parentPtr)->ptrs[i]->vals.front();
+            }
+            while(parentPtr != visitedNodes.rend() && find((*parentPtr)->vals.begin(), (*parentPtr)->vals.end(), val) == (*parentPtr)->vals.end()) {
+                ++parentPtr;
+            }
+            if (parentPtr != visitedNodes.rend()) {
+                for (auto & key : (*parentPtr)->vals) {
+                    if (key == val) {
+                        key = ptr->vals.front();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Check if we need to update the right parent
+        if (updateRight && false) {
+            Node<T> * rightSibling = nullptr, *rightSiblingsParent = nullptr;
+            if (childIndex + 1 < visitedNodes.back()->ptrs.size()) {
+                rightSiblingsParent = visitedNodes.back();
+                rightSibling = visitedNodes.back()->ptrs[childIndex + 1];
+            } else {
+                auto rightPtr = ++visitedNodes.rbegin();
+                auto rightPtrIndex = find((*rightPtr)->ptrs.begin(), (*rightPtr)->ptrs.end(), *(rightPtr - 1));
+                while (rightPtrIndex == (*rightPtr)->ptrs.end() - 1) {
+                    ++rightPtr;
+                    if (rightPtr == visitedNodes.rend()) break;
+                    rightPtrIndex = find((*rightPtr)->ptrs.begin(), (*rightPtr)->ptrs.end(), *(rightPtr - 1));
+                }
+                rightSibling = *rightPtr;
+                rightSibling = rightSibling->ptrs.back();
+                stack<Node<T> *> nodeStack;
+                while (rightSibling->type != Node<T>::DATA) {
+                    nodeStack.push(rightSibling);
+                    rightSiblingsParent = rightSibling;
+                    rightSibling = rightSibling->ptrs.front();
+                }
+                while (find(rightSiblingsParent->vals.begin(), rightSiblingsParent->vals.end(), oldRightFront) == rightSiblingsParent->vals.end()) {
+                    rightSiblingsParent = nodeStack.top();
+                    if (nodeStack.empty()) break;
+                    nodeStack.pop();
+                }
+                if (find(rightSiblingsParent->vals.begin(), rightSiblingsParent->vals.end(), oldRightFront) == rightSiblingsParent->vals.end()) {
+                    while(find((*rightPtr)->vals.begin(), (*rightPtr)->vals.end(), oldRightFront) == (*rightPtr)->vals.end()) {
+                        --rightPtr;
+                    }
+                    rightSiblingsParent = *rightPtr;
+                }
+                rightSiblingsParent->vals.front() = rightSibling->vals.front();
+            }
+        }
+    } else {
+        // collapse
     }
 }
 
