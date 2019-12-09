@@ -39,33 +39,101 @@ private:
 
 public:
 // Constructors
-    // default constructor: L=M-1
+    /*
+     Description: Default construcor for a B+ Tree
+     Return: n/A
+     Precondition: None
+     Postcondition: A B+ tree exists with the order specified
+     */
     explicit BPlusTree(size_t M = 5);
-    // other constructor
+    /*
+    Description: Alternate construcor for a B+ Tree
+    Return: n/A
+    Precondition: None
+    Postcondition: A B+ tree exists with the order and datanode size specified
+    */
     BPlusTree(size_t M, size_t L);
-    // destructor
+    /*
+    Description: Destructor for B+ tree
+    Return: n/A
+    Precondition: The B+ tree has been constructed
+    Postcondition: The B+ Tree is destructed and all allocated memory is deallocated
+    */
     ~BPlusTree();
 
 // Big N
-    // copy constructor
+    /*
+    Description: Copy constructor for B+ tree
+    Return: n/A
+    Precondition: "other" has already been constructed
+    Postcondition: The new B+ tree is created which is a perfect copy of "other"
+    */
     BPlusTree(const BPlusTree & other);
-    // move constructor
+    /*
+    Description: Move constructor for B+ tree
+    Return: n/A
+    Precondition: "other" has already been constructed
+    Postcondition: The new B+ tree is created and passed the root of "other".
+    */
     BPlusTree(BPlusTree && other);
-    // copy assignment operator
+    /*
+    Description: Copy assignment operator for B+ tree
+    Return: a reference to the current B+ tree
+    Precondition: This tree and "other" has already been constructed
+    Postcondition: The current B+ tree is cleared and copies all the values from "other"
+    */
     BPlusTree & operator=(const BPlusTree & other);
-    // move assignment operator
+    /*
+    Description: Move assignment operator for B+ tree
+    Return: a reference to the current B+ tree
+    Precondition: This tree and "other" has already been constructed
+    Postcondition: The current B+ tree is cleared and now points to "other"'s root
+    */
     BPlusTree & operator=(BPlusTree && other);
 
 
 // Modifiers
-    void insert(const T & val);  // insert into tree
-    void remove(const T & val);  // remove from tree
-    void makeEmpty();            // make the tree empty
+    /*
+    Description: Insert the passed value into the B+ tree
+    Return: void
+    Precondition: The B+ tree is constructed
+    Postcondition: The new value is inserted as data into the new tree, re-balancing if necessary.
+    */
+    void insert(const T & val);
+    /*
+    Description: Removes the passed value from the B+ tree if it's present in the tree
+    Return: void
+    Precondition: The B+ tree is constructed
+    Postcondition: If the value exists in the tree, it is removed and the tree is re-balanced
+     and memory is de-allocated if necessary.
+    */
+    void remove(const T & val);
+    /*
+    Description: Removes all values from the B+ tree
+    Return: void
+    Precondition: The B+ tree is constructed
+    Postcondition: All previous values in the tree are removed, and all allocated memory is de-allocated.
+    */
+    void makeEmpty();
+    /*
+    Description: Removes all values from the B+ tree and modifies the value of M
+    Return: void
+    Precondition: The B+ tree is constructed
+    Postcondition: All values in the tree are removed, all memory is deallocated and M and L
+     are modified to the new M and the new M - 1, respectively.
+    */
     void setMAndClear(int m) {
         makeEmpty();
         this->M = m;
         this->L = m - 1;
     }
+    /*
+    Description: Removes all values from the B+ tree and modifies the value of M
+    Return: void
+    Precondition: The B+ tree is constructed
+    Postcondition: All values in the tree are removed, all memory is deallocated and M and L
+     are modified to the new M and the new M - 1, respectively.
+    */
     void setLAndClear(int l) {
         makeEmpty();
         this->L = l;
@@ -104,20 +172,7 @@ BPlusTree<T>::BPlusTree(size_t M, size_t L)
 
 template<typename T>
 BPlusTree<T>::~BPlusTree() {
-    if (!root)
-        return;
-    stack<Node<T>*> toDelete;
-    toDelete.push(root);
-    while (!toDelete.empty()) {
-        Node<T>* node = toDelete.top();
-        toDelete.pop();
-        if (node->getType() == Node<T>::KEY) {
-            for (Node<T>* n : node->getPointers()) {
-                toDelete.push(n);
-            }
-        }
-        delete node;
-    }
+    makeEmpty();
 }
 
 template<typename T>
@@ -125,7 +180,7 @@ BPlusTree<T>::BPlusTree(const BPlusTree &other) {
     M = other.M;
     L = other.L;
     root = nullptr;
-    size = other.size;
+    size = 0; // changed when inserting
     //if the other tree contains data, copy it.
     if(!other.isEmpty()) {
         //establish a pointer to the other root
@@ -150,6 +205,7 @@ BPlusTree<T>::BPlusTree(BPlusTree &&other) {
     L = other.L;
     root = other.root;
     size = other.size;
+    other.root = nullptr; // no double free
 }
 
 template<typename T>
@@ -161,7 +217,7 @@ BPlusTree<T>& BPlusTree<T>::operator=(const BPlusTree &other) {
             this->makeEmpty();
         M = other.M;
         L = other.L;
-        size = other.size;
+        size = 0; // changed on inserts
         //if the other tree contains data, copy it.
         if(!other.isEmpty()) {
             //establish a pointer to the other root
@@ -192,6 +248,7 @@ BPlusTree<T>& BPlusTree<T>::operator=(BPlusTree &&other) {
         L = other.L;
         root = other.root;
         size = other.size;
+        other.root = nullptr;
     }
 }
 
