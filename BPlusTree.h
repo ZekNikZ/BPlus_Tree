@@ -37,6 +37,14 @@ private:
     // ^ Amount of Data ^
     size_t size; // current amount of data stored
 
+    void remove (const T & key, Node<T> * ptr, Node<T> * node);
+
+    Node<T> * rightSib(Node<T> * node);
+
+    Node<T> * leftSib(Node<T> * node);
+
+    Node<T> * par(Node<T> * node, Node<T> * n=nullptr);
+
 public:
 // Constructors
     /*
@@ -467,7 +475,7 @@ void BPlusTree<T>::remove(const T &val) {
 
     // Remove the value
     bool updateParent = false;
-    if (ptr->vals[0] == val) {
+    if (ptr->vals[0] == val && ptr != root) {
         updateParent = true;
     }
     ptr->vals.erase(find(ptr->vals.begin(), ptr->vals.end(), val));
@@ -476,7 +484,7 @@ void BPlusTree<T>::remove(const T &val) {
     bool updateRight = false, collapse = false;
     Node<T> * leftSiblingsParent = nullptr;
     T oldRightFront;
-    if (ptr->vals.size() < L / 2) {
+    if (ptr->vals.size() < L / 2 && ptr != root) {
         // Check if right sibling has excess data
         if (!ptr->ptrs.empty() && ptr->ptrs.front()->vals.size() > L/2) {
             updateRight = true;
@@ -523,6 +531,12 @@ void BPlusTree<T>::remove(const T &val) {
                 cout << "collapse" << endl;
             }
         }
+    }
+
+    if (ptr == root && ptr->vals.size() == 0) {
+        delete ptr;
+        root = nullptr;
+        return;
     }
 
     // Collapse and/or fix parents
@@ -583,7 +597,226 @@ void BPlusTree<T>::remove(const T &val) {
             }
         }
     } else {
-        // collapse
+        Node<T>* parent = par(ptr);
+        Node<T> * rightSibling = rightSib(ptr);
+        Node<T> * leftSibling = leftSib(ptr);
+
+        // Try merging with right
+        if (rightSibling) {
+            for (T & val : rightSibling->vals) {
+                ptr->vals.push_back(val);
+            }
+            ptr->ptrs.front() = rightSibling->ptrs.front();
+
+            Node<T> * rightParent = par(rightSibling);
+
+            int i = 0;
+            for (; i < rightSibling->vals.size(); ++i) {
+                if (rightSibling->vals[i] > rightParent->vals.front()) {
+                    break;
+                }
+            }
+
+            delete(i - 1, rightSibling, rightParent);
+        }
+        // Try merging with left
+        else {
+            for (T & val : ptr->vals) {
+                leftSibling->vals.push_back(val);
+            }
+            leftSibling->ptrs.front() = ptr->ptrs.front();
+
+            int i = 0;
+            for (; i < parent->vals.size(); ++i) {
+                if (parent->vals[i] > ptr->vals.front()) {
+                    break;
+                }
+            }
+
+            delete(i - 1, ptr, parent);
+        }
+    }
+}
+
+template<typename T>
+Node<T> * BPlusTree<T>::rightSib(Node<T> * node) {
+    Node<T> * ptr = root;
+    stack<pair<Node<T> *, int>> nodeStack;
+    nodeStack.push({ptr, 0});
+
+    // Go down
+    while (ptr != node) {
+        int i = 0;
+        for (; i < ptr->vals.size(); ++i) {
+            if (ptr->vals[i] > node->vals.front()) {
+                ptr = ptr->ptrs[i];
+                break;
+            }
+        }
+
+        if (i == ptr->vals.size()) {
+            ptr = ptr->ptrs.back();
+        }
+
+        nodeStack.push({ptr, i});
+    }
+
+    int height = nodeStack.size();
+
+    // Go up
+    ptr = nodeStack.top().first;
+    int index = nodeStack.top().second;
+    nodeStack.pop();
+
+    while (!nodeStack.empty() && index + 1 >= nodeStack.top().first->ptrs.size()) {
+        ptr = nodeStack.top().first;
+        index = nodeStack.top().second;
+        nodeStack.pop();
+    }
+
+    if (nodeStack.empty()) return nullptr;
+
+    nodeStack.push({ptr, -1});
+    ptr = ptr->ptrs[index + 1];
+
+    // Go down
+    while (nodeStack.size() != height) {
+        nodeStack.push({ptr, -1});
+        ptr = ptr->ptrs.front();
+    }
+
+    return ptr;
+}
+
+template<typename T>
+Node<T> * BPlusTree<T>::leftSib(Node<T> * node) {
+    Node<T> * ptr = root;
+    stack<pair<Node<T> *, int>> nodeStack;
+    nodeStack.push({ptr, 0});
+
+    // Go down
+    while (ptr != node) {
+        int i = 0;
+        for (; i < ptr->vals.size(); ++i) {
+            if (ptr->vals[i] > node->vals.front()) {
+                ptr = ptr->ptrs[i];
+                break;
+            }
+        }
+
+        if (i == ptr->vals.size()) {
+            ptr = ptr->ptrs.back();
+        }
+
+        nodeStack.push({ptr, i});
+    }
+
+    int height = nodeStack.size();
+
+    // Go up
+    ptr = nodeStack.top().first;
+    int index = nodeStack.top().second;
+    nodeStack.pop();
+
+    while (!nodeStack.empty() && index - 1 >= 0) {
+        ptr = nodeStack.top().first;
+        index = nodeStack.top().second;
+        nodeStack.pop();
+    }
+
+    if (nodeStack.empty()) return nullptr;
+
+    nodeStack.push({ptr, -1});
+    ptr = ptr->ptrs[index - 1];
+
+    // Go down
+    while (nodeStack.size() != height) {
+        nodeStack.push({ptr, -1});
+        ptr = ptr->ptrs.back();
+    }
+
+    return ptr;
+}
+
+template<typename T>
+Node<T>* BPlusTree<T>::par(Node<T> * node, Node<T> * n) {
+    Node<T> * ptr = n;
+
+    if (ptr == node) {
+        return ptr;
+    }
+
+    int i = 0;
+    for (; i < ptr->vals.size(); ++i) {
+        if (ptr->vals[i] > node->vals.front()) {
+            ptr = ptr->ptrs[i];
+            break;
+        }
+    }
+    if (ptr == n) {
+        ptr = ptr->ptrs.back();
+    }
+
+    return par(node, ptr);
+}
+
+template<typename T>
+void BPlusTree<T>::remove(const T & key, Node<T> * subtree, Node<T> * node) {
+    // Delete the key and subtree
+    auto keyLoc = find(node->vals.begin(), node->vals.end(), key);
+    node->vals.erase(keyLoc - node->vals.begin());
+    auto subtreeLoc = find(node->ptrs.begin(), node->ptrs.end(), subtree);
+    delete *subtreeLoc;
+    node->ptrs.erase(subtreeLoc - node->ptrs.begin());
+
+    // If we still have enough keys, stop
+    if (node->ptrs.size() <= M / 2) {
+        Node<T>* parent = par(node);
+        Node<T> * rightSibling = rightSib(node);
+        Node<T> * leftSibling = leftSib(node);
+        auto nodeLocInParent = find(parent->ptrs.begin(), parent->ptrs.end(), node);
+        T & keyInParent = parent->keys[distance(parent->ptrs.begin(), nodeLocInParent)];
+
+        // Try stealing from right
+        if (rightSibling && rightSibling->ptrs.size() > M / 2 + 1) {
+            // Move the leftmost pointer from the right sibling
+            node->ptrs.push_back(rightSibling->ptrs.front());
+            rightSibling->ptrs.erase(rightSibling->ptrs.begin());
+
+            // Move the leftmost key through the parent
+            node->vals.push_back(keyInParent);
+            keyInParent = rightSibling->vals.front();
+            rightSibling->vals.erase(rightSibling->vals.begin());
+        }
+        // Try stealing from left
+        else if (leftSibling && leftSibling->ptrs.size() > M / 2 + 1) {
+            // Move the leftmost pointer from the right sibling
+            node->ptrs.insert(node->ptrs.begin(), leftSibling->ptrs.back());
+            leftSibling->ptrs.pop_back();
+
+            // Move the leftmost key through the parent
+            node->vals.insert(node->vals.begin(), keyInParent);
+            keyInParent = leftSibling->vals.back();
+            leftSibling->vals.pop_back();
+        }
+        // Try merging with right
+        else if (rightSibling) {
+            node->vals.push_back(keyInParent);
+            for (T & val : rightSibling->vals) {
+                node->vals.push_back(val);
+            }
+
+            delete(keyInParent, *nodeLocInParent, parent);
+        }
+        // Try merging with left
+        else {
+            leftSibling->vals.push_back(keyInParent);
+            for (T & val : node->vals) {
+                leftSibling->vals.push_back(val);
+            }
+
+            delete(keyInParent, *nodeLocInParent, parent);
+        }
     }
 }
 
