@@ -650,7 +650,7 @@ Node<T> * BPlusTree<T>::rightSib(Node<T> * node) {
     while (ptr != node) {
         int i = 0;
         for (; i < ptr->vals.size(); ++i) {
-            if (ptr->vals[i] > node->vals.front()) {
+            if (ptr->vals[i] < node->vals.front()) {
                 ptr = ptr->ptrs[i];
                 break;
             }
@@ -702,7 +702,7 @@ Node<T> * BPlusTree<T>::leftSib(Node<T> * node) {
     while (ptr != node) {
         int i = 0;
         for (; i < ptr->vals.size(); ++i) {
-            if (ptr->vals[i] > node->vals.front()) {
+            if (ptr->vals[i] < node->vals.front()) {
                 ptr = ptr->ptrs[i];
                 break;
             }
