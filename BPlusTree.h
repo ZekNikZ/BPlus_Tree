@@ -474,9 +474,9 @@ void BPlusTree<T>::remove(const T &val) {
     }
     
     // Find the relevant nodes
-    Node<T>* parent = par(ptr);
-    Node<T> * rightSibling = rightSib(ptr);
-    Node<T> * leftSibling = leftSib(ptr);
+//    Node<T>* parent = par(ptr);
+//    Node<T> * rightSibling = rightSib(ptr);
+//    Node<T> * leftSibling = leftSib(ptr);
 
     // Remove the value
     bool updateParent = false;
@@ -600,41 +600,41 @@ void BPlusTree<T>::remove(const T &val) {
             }
         }
     } else {
-
-        // Try merging with right
-        if (rightSibling) {
-            for (T & val : rightSibling->vals) {
-                ptr->vals.push_back(val);
-            }
-            ptr->ptrs.front() = rightSibling->ptrs.front();
-
-            Node<T> * rightParent = par(rightSibling);
-
-            int i = 0;
-            for (; i < rightSibling->vals.size(); ++i) {
-                if (rightSibling->vals[i] > rightParent->vals.front()) {
-                    break;
-                }
-            }
-
-            delete(i - 1, rightSibling, rightParent);
-        }
-        // Try merging with left
-        else {
-            for (T & val : ptr->vals) {
-                leftSibling->vals.push_back(val);
-            }
-            leftSibling->ptrs.front() = ptr->ptrs.front();
-
-            int i = 0;
-            for (; i < parent->vals.size(); ++i) {
-                if (parent->vals[i] > ptr->vals.front()) {
-                    break;
-                }
-            }
-
-            delete(i - 1, ptr, parent);
-        }
+//
+//        // Try merging with right
+//        if (rightSibling) {
+//            for (T & val : rightSibling->vals) {
+//                ptr->vals.push_back(val);
+//            }
+//            ptr->ptrs.front() = rightSibling->ptrs.front();
+//
+//            Node<T> * rightParent = par(rightSibling);
+//
+//            int i = 0;
+//            for (; i < rightSibling->vals.size(); ++i) {
+//                if (rightSibling->vals[i] > rightParent->vals.front()) {
+//                    break;
+//                }
+//            }
+//
+//            delete(i - 1, rightSibling, rightParent);
+//        }
+//        // Try merging with left
+//        else {
+//            for (T & val : ptr->vals) {
+//                leftSibling->vals.push_back(val);
+//            }
+//            leftSibling->ptrs.front() = ptr->ptrs.front();
+//
+//            int i = 0;
+//            for (; i < parent->vals.size(); ++i) {
+//                if (parent->vals[i] > ptr->vals.front()) {
+//                    break;
+//                }
+//            }
+//
+//            delete(i - 1, ptr, parent);
+//        }
     }
 }
 

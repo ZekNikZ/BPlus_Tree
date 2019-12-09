@@ -1,0 +1,96 @@
+// Ensure there is data in the tree
+if root == nullptr:
+    return
+
+// Navigate to the data node which should have the value
+vector visitedNodes = {}
+ptr = root
+int childIndex
+while ptr->ptrs.size() > 2:
+    for key (i) in ptr->keys:
+        if val < key: 
+            break
+    visitedNodes.push_back(ptr)
+    ptr = ptr->ptrs[i]
+    childIndex = i
+
+// Ensure the data is in the tree
+if ptr->vals.find(val) != __::npos:
+    return;
+
+// Remove the value
+bool updateParent = false
+if ptr->vals[0] == val:
+    if childIndex > 0:
+        if visitedNodes.back()->vals[childIndex - 1] == val:  # might not need this line
+            updateParent = true
+ptr->vals.remove(val)
+
+// Check if we need to steal data from another data node
+bool updateRight = false, collapse = false
+Node * leftSiblingsParent = nullptr
+if ptr->vals.size() < L / 2:
+    // Check if right sibling has excess data
+    if ptr->ptrs[0]->vals.size() > L / 2:
+        updateRight = true;
+        ptr->vals.push_back(ptr->ptrs[0]->vals[0])
+        ptr->ptrs[0]->vals.pop_front()
+    else:
+        // Navigate to the left sibling
+        Node * leftSibiling
+        if childIndex > 0:
+            leftSibiling = visitedNodes.back()->ptrs[childIndex - 1]
+        else: 
+            auto leftPtr = ++visitedNodes.rbegin()
+            while (*leftPtr)->ptrs.find(*(leftPtr - 1)) == 0:
+                ++leftPtr
+            leftSibling = (*leftPtr)->ptrs[(*leftPtr)->ptrs.find(*(leftPtr - 1)) - 1]
+            while (leftSibiling.type != DATA):
+                leftSiblingsParent = leftSibling
+                leftSibling = leftSibiling->ptrs.back()
+
+        // Check if left sibling has excess data
+        if leftSibiling->vals.size() > L / 2
+            ptr->vals.push_front(leftSibiling->vals.back())
+            leftSibiling->vals.pop_back()
+        // Otherwise, collapse
+        else:
+            collapse = true
+
+// Collapse or fix parents
+if !collapse:
+    // Check if we need to update the parent
+    if updateParent:
+        auto parentPtr = visitedNodes.rbegin()
+        while (!(*parentPtr)->vals.contains(val))
+            ++parentPtr
+        for (auto & key : (*parentPtr)->vals):
+            if key == val:
+                key = ptr->vals.front()
+                break
+        # or visitedNodes.back()->vals[visitedNodes.back()->vals.find(val)] = ptr->vals.front()
+    if updateRight:
+        Node* rightSibling = nullptr, rightSiblingsParent
+        if childIndex + 1 < visitedNodes.back()->ptrs.size():
+            rightSibling = visitedNodes.back()->ptrs[childIndex + 1]
+        else:
+            auto rightPtr = ++visitedNodes.rbegin()
+            while (*rightPtr)->ptrs.find(*(rightPtr - 1)) == (*rightPtr)->ptrs.size() - 1:
+                ++rightPtr
+            rightSibling = (*rightPtr)->ptrs[(*rightPtr)->ptrs.find(*(rightPtr - 1)) - 1]
+            stack<Node *> nodeStack
+            while (rightSibling.type != DATA):
+                nodeStack.push(rightSibling)
+                rightSiblingsParent = rightSibling
+                rightSibling = rightSibling->ptrs.front()
+            while (!rightSiblingsParent->vals.contains(rightSibling->vals.front())):   
+                rightSiblingsParent = nodeStack.top()
+                nodeStack.pop()
+            if (!rightSiblingsParent->vals.contains(rightSibling->vals.front())) {
+                while(!(*rightPtr)->vals.contains(rightSibling->vals.front())) {
+                    --rightPtr
+                }
+                rightSiblingsParent = *rightPtr
+            }
+        rightSiblingsParent.vals.front() = rightSibling->vals.front()
+else:
