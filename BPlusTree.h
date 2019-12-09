@@ -262,6 +262,8 @@ BPlusTree<T>& BPlusTree<T>::operator=(BPlusTree &&other) {
 
 template<typename T>
 void BPlusTree<T>::insert(const T &val) {
+    if (contains(val)) return;
+    
     bool insert = false;
     // check if there is an exisiting tree of not
     if (root == nullptr){
@@ -507,8 +509,7 @@ void BPlusTree<T>::remove(const T &val) {
                         leftPtrIndex = find((*leftPtr)->ptrs.begin(), (*leftPtr)->ptrs.end(), *(leftPtr - 1));
                     }
                     if (leftPtr != visitedNodes.rend()) {
-                        leftSibling = *leftPtr;
-                        leftSibling = leftSibling->ptrs.front();
+                        leftSibling = *(leftPtrIndex - 1);
                         while (leftSibling->type != Node<T>::DATA) {
                             leftSiblingsParent = leftSibling;
                             leftSibling = leftSibling->ptrs.back();
@@ -561,7 +562,7 @@ void BPlusTree<T>::remove(const T &val) {
         }
 
         // Check if we need to update the right parent
-        if (updateRight && false) {
+        if (updateRight) {
             Node<T> * rightSibling = nullptr, *rightSiblingsParent = nullptr;
             if (childIndex + 1 < visitedNodes.back()->ptrs.size()) {
                 rightSiblingsParent = visitedNodes.back();
@@ -574,8 +575,7 @@ void BPlusTree<T>::remove(const T &val) {
                     if (rightPtr == visitedNodes.rend()) break;
                     rightPtrIndex = find((*rightPtr)->ptrs.begin(), (*rightPtr)->ptrs.end(), *(rightPtr - 1));
                 }
-                rightSibling = *rightPtr;
-                rightSibling = rightSibling->ptrs.back();
+                rightSibling = *(rightPtrIndex + 1);
                 stack<Node<T> *> nodeStack;
                 while (rightSibling->type != Node<T>::DATA) {
                     nodeStack.push(rightSibling);
@@ -583,8 +583,8 @@ void BPlusTree<T>::remove(const T &val) {
                     rightSibling = rightSibling->ptrs.front();
                 }
                 while (find(rightSiblingsParent->vals.begin(), rightSiblingsParent->vals.end(), oldRightFront) == rightSiblingsParent->vals.end()) {
-                    rightSiblingsParent = nodeStack.top();
                     if (nodeStack.empty()) break;
+                    rightSiblingsParent = nodeStack.top();
                     nodeStack.pop();
                 }
                 if (find(rightSiblingsParent->vals.begin(), rightSiblingsParent->vals.end(), oldRightFront) == rightSiblingsParent->vals.end()) {
@@ -593,7 +593,7 @@ void BPlusTree<T>::remove(const T &val) {
                     }
                     rightSiblingsParent = *rightPtr;
                 }
-                rightSiblingsParent->vals.front() = rightSibling->vals.front();
+                *(find(rightSiblingsParent->vals.begin(), rightSiblingsParent->vals.end(), oldRightFront)) = rightSibling->vals.front();
             }
         }
     } else {
@@ -867,6 +867,8 @@ Node<T>* BPlusTree<T>::findPos(const T &val) const {
 
 template<typename T>
 bool BPlusTree<T>::contains(const T &val) const {
+    if (!root) return false;
+    
     Node<T>* current = root;
     bool found = false;
     while (current->getType() == Node<T>::KEY){
