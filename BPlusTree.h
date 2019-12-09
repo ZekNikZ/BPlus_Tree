@@ -43,7 +43,7 @@ private:
 
     Node<T> * leftSib(Node<T> * node);
 
-    Node<T> * par(Node<T> * node, Node<T> * n=nullptr);
+    Node<T> * par(Node<T> * node);
 
 public:
 // Constructors
@@ -474,6 +474,11 @@ void BPlusTree<T>::remove(const T &val) {
     if (find(ptr->vals.begin(), ptr->vals.end(), val) == ptr->vals.end()) {
         return;
     }
+    
+    // Find the relevant nodes
+    Node<T>* parent = par(ptr);
+    Node<T> * rightSibling = rightSib(ptr);
+    Node<T> * leftSibling = leftSib(ptr);
 
     // Remove the value
     bool updateParent = false;
@@ -519,7 +524,7 @@ void BPlusTree<T>::remove(const T &val) {
             }
 
             // Check if left sibling has excess data
-            cout << "leftSibling: " << leftSibling->vals.front() << endl;
+            //cout << "leftSibling: " << leftSibling->vals.front() << endl;
             if (leftSibling && leftSibling->vals.size() > L / 2) {
                 ptr->vals.insert(ptr->vals.begin(), leftSibling->vals.back());
                 leftSibling->vals.pop_back();
@@ -597,9 +602,6 @@ void BPlusTree<T>::remove(const T &val) {
             }
         }
     } else {
-        Node<T>* parent = par(ptr);
-        Node<T> * rightSibling = rightSib(ptr);
-        Node<T> * leftSibling = leftSib(ptr);
 
         // Try merging with right
         if (rightSibling) {
@@ -675,6 +677,8 @@ Node<T> * BPlusTree<T>::rightSib(Node<T> * node) {
     }
 
     if (nodeStack.empty()) return nullptr;
+    
+    ptr = nodeStack.top().first;
 
     nodeStack.push({ptr, -1});
     ptr = ptr->ptrs[index + 1];
@@ -739,25 +743,27 @@ Node<T> * BPlusTree<T>::leftSib(Node<T> * node) {
 }
 
 template<typename T>
-Node<T>* BPlusTree<T>::par(Node<T> * node, Node<T> * n) {
-    Node<T> * ptr = n;
+Node<T>* BPlusTree<T>::par(Node<T> * node) {
+    Node<T> * ptr = root, * prev = nullptr;
 
-    if (ptr == node) {
-        return ptr;
-    }
+    // Go down
+    while (ptr != node) {
+        int i = 0;
+        for (; i < ptr->vals.size(); ++i) {
+            if (ptr->vals[i] > node->vals.front()) {
+                prev = ptr;
+                ptr = ptr->ptrs[i];
+                break;
+            }
+        }
 
-    int i = 0;
-    for (; i < ptr->vals.size(); ++i) {
-        if (ptr->vals[i] > node->vals.front()) {
-            ptr = ptr->ptrs[i];
-            break;
+        if (i == ptr->vals.size()) {
+            prev = ptr;
+            ptr = ptr->ptrs.back();
         }
     }
-    if (ptr == n) {
-        ptr = ptr->ptrs.back();
-    }
-
-    return par(node, ptr);
+    
+    return prev;
 }
 
 template<typename T>
