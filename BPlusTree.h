@@ -161,8 +161,6 @@ public:
     template <class Key>
     // print data in order of least to greatest
     friend ostream & operator<<(ostream & out, const BPlusTree<Key>& tree);
-
-    static BPlusTree<T> makeTestTree();
 };
 
 // All functions are implemented in the .h file because C++ is jank with
@@ -914,52 +912,6 @@ ostream &operator<<(ostream &out, const BPlusTree<Key> &tree) {
             ptr = ptr->ptrs[0];
     }
     return out;
-}
-
-template <class T>
-BPlusTree<T> BPlusTree<T>::makeTestTree() {
-    auto bottom8 = new Node<T>(Node<T>::DATA);
-    bottom8->vals = {987, 1597, 9999};
-    bottom8->ptrs = {nullptr};
-    auto bottom7 = new Node<T>(Node<T>::DATA);
-    bottom7->vals = {377, 610};
-    bottom7->ptrs = {bottom8};
-    auto bottom6 = new Node<T>(Node<T>::DATA);
-    bottom6->vals = {144, 233};
-    bottom6->ptrs = {bottom7};
-    auto bottom5 = new Node<T>(Node<T>::DATA);
-    bottom5->vals = {55, 89};
-    bottom5->ptrs = {bottom6};
-    auto bottom4 = new Node<T>(Node<T>::DATA);
-    bottom4->vals = {21, 34};
-    bottom4->ptrs = {bottom5};
-    auto bottom3 = new Node<T>(Node<T>::DATA);
-    bottom3->vals = {8, 13};
-    bottom3->ptrs = {bottom4};
-    auto bottom2 = new Node<T>(Node<T>::DATA);
-    bottom2->vals = {3, 5};
-    bottom2->ptrs = {bottom3};
-    auto bottom1 = new Node<T>(Node<T>::DATA);
-    bottom1->vals = {1, 2};
-    bottom1->ptrs = {bottom2};
-
-    auto midLeft = new Node<T>(Node<T>::KEY);
-    midLeft->vals = {3, 8};
-    midLeft->ptrs = {bottom1, bottom2, bottom3};
-    auto midRight = new Node<T>(Node<T>::KEY);
-    midRight->vals = {55, 144, 377, 987};
-    midRight->ptrs = {bottom4, bottom5, bottom6, bottom7, bottom8};
-
-    auto top = new Node<T>(Node<T>::KEY);
-    top->vals = {21};
-    top->ptrs = {midLeft, midRight};
-
-    BPlusTree tree;
-    tree.M = 5;
-    tree.L = 4;
-    tree.root = top;
-    tree.size = 17;
-    return tree;
 }
 
 #endif // BPLUSTREE_H
